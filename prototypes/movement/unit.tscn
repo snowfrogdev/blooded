@@ -1,10 +1,23 @@
-[gd_scene load_steps=6 format=3 uid="uid://bfb4ijafodwa7"]
+[gd_scene load_steps=9 format=3 uid="uid://bfb4ijafodwa7"]
 
 [ext_resource type="Script" uid="uid://bnf4wta4e8l4l" path="res://prototypes/movement/unit.gd" id="1_unit"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xwgc7"]
+albedo_color = Color(0.27387285, 0.27387273, 0.2738727, 1)
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_r3ulc"]
+material = SubResource("StandardMaterial3D_xwgc7")
 radius = 0.3
 height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yolrm"]
+albedo_color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_txqrf"]
+material = SubResource("StandardMaterial3D_yolrm")
+top_radius = 0.03
+bottom_radius = 0.07
+height = 0.7
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ff5wu"]
 radius = 0.33251953
@@ -26,6 +39,10 @@ script = ExtResource("1_unit")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_r3ulc")
+
+[node name="Gun" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.15805808, 0.29064608, 0.51853335)
+mesh = SubResource("CylinderMesh_txqrf")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0069885254, 0)

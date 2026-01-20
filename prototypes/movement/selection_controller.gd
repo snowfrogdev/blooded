@@ -6,6 +6,7 @@ extends Node3D
 signal selection_changed(units: Array[Unit])
 
 @export_node_path("Camera3D") var camera_path: NodePath
+@export var formation_instance: FormationInstance
 
 const TERRAIN_LAYER := 1
 const UNIT_LAYER := 2
@@ -49,15 +50,16 @@ func _handle_select(screen_pos: Vector2) -> void:
 
 
 func _handle_command(screen_pos: Vector2) -> void:
-	if _selected_units.is_empty():
-		return
-
 	var result := _raycast(screen_pos, TERRAIN_LAYER)
 	if result.is_empty():
 		return
 
-	for unit in _selected_units:
-		unit.command_move(result.position)
+	# If we have a formation, move it instead of individual units
+	if formation_instance:
+		formation_instance.command_move(result.position)
+	else:
+		for unit in _selected_units:
+			unit.command_move(result.position)
 
 
 func _select_unit(unit: Unit) -> void:

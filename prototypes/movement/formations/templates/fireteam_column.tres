@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="FormationTemplate" load_steps=7 format=3 uid="uid://daed3muid606k"]
+
+[ext_resource type="Script" uid="uid://cu30hvdtw4fl8" path="res://prototypes/movement/formations/resources/formation_template.gd" id="1"]
+[ext_resource type="Script" uid="uid://bida3gqn1fxt3" path="res://prototypes/movement/formations/resources/slot_definition.gd" id="2"]
+
+[sub_resource type="Resource" id="slot_0"]
+script = ExtResource("2")
+local_position = Vector3(0.0039967597, -4.220009e-05, 4.0334444)
+required_tags = Array[StringName]([&"infantry"])
+priority = 10
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2")
+local_position = Vector3(0.0039967597, -4.220009e-05, 0.009701252)
+required_tags = Array[StringName]([&"infantry"])
+priority = 5
+
+[sub_resource type="Resource" id="slot_2"]
+script = ExtResource("2")
+local_position = Vector3(0, 0, -4)
+required_tags = Array[StringName]([&"infantry"])
+priority = 5
+
+[sub_resource type="Resource" id="slot_3"]
+script = ExtResource("2")
+local_position = Vector3(0.003799796, -4.220009e-05, -8.007903)
+required_tags = Array[StringName]([&"infantry"])
+
+[resource]
+script = ExtResource("1")
+display_name = "Fireteam Column"
+description = "4-person column formation for movement through narrow terrain"
+slots = Array[ExtResource("2")]([SubResource("slot_0"), SubResource("slot_1"), SubResource("slot_2"), SubResource("slot_3")])

@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="FormationTemplate" load_steps=7 format=3 uid="uid://ck2bgfon24kj0"]
+
+[ext_resource type="Script" uid="uid://cu30hvdtw4fl8" path="res://prototypes/movement/formations/resources/formation_template.gd" id="1"]
+[ext_resource type="Script" uid="uid://bida3gqn1fxt3" path="res://prototypes/movement/formations/resources/slot_definition.gd" id="2"]
+
+[sub_resource type="Resource" id="slot_0"]
+script = ExtResource("2")
+required_tags = Array[StringName]([&"infantry"])
+priority = 10
+
+[sub_resource type="Resource" id="slot_1"]
+script = ExtResource("2")
+local_position = Vector3(-3.9900062, -4.220009e-05, -2.0067196)
+required_tags = Array[StringName]([&"infantry"])
+priority = 5
+
+[sub_resource type="Resource" id="slot_2"]
+script = ExtResource("2")
+local_position = Vector3(4.0165615, -4.220009e-05, -2.020359)
+required_tags = Array[StringName]([&"infantry"])
+priority = 5
+
+[sub_resource type="Resource" id="slot_3"]
+script = ExtResource("2")
+local_position = Vector3(-7.972831, -4.220009e-05, -3.9572124)
+required_tags = Array[StringName]([&"infantry"])
+
+[resource]
+script = ExtResource("1")
+display_name = "Fireteam Wedge"
+description = "4-person wedge formation with team lead at point"
+slots = Array[ExtResource("2")]([SubResource("slot_0"), SubResource("slot_1"), SubResource("slot_2"), SubResource("slot_3")])
