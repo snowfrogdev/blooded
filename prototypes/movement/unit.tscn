@@ -1,4 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bfb4ijafodwa7"]
+[gd_scene load_steps=6 format=3 uid="uid://bfb4ijafodwa7"]
+
+[ext_resource type="Script" uid="uid://bnf4wta4e8l4l" path="res://prototypes/movement/unit.gd" id="1_unit"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_r3ulc"]
 radius = 0.3
@@ -8,12 +10,28 @@ height = 1.8
 radius = 0.33251953
 height = 1.8231812
 
-[node name="Unit" type="StaticBody3D"]
+[sub_resource type="TorusMesh" id="TorusMesh_select"]
+inner_radius = 0.35
+outer_radius = 0.45
+rings = 32
+ring_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_select"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.9, 0.3, 1)
+
+[node name="Unit" type="CharacterBody3D"]
+collision_layer = 2
+script = ExtResource("1_unit")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_r3ulc")
-skeleton = NodePath("../../..")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0069885254, 0)
 shape = SubResource("CapsuleShape3D_ff5wu")
+
+[node name="SelectionIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.99996555, -0.008307591, 0, 0.008307591, 0.99996555, 0, -0.85108376, 0)
+mesh = SubResource("TorusMesh_select")
+surface_material_override/0 = SubResource("StandardMaterial3D_select")
