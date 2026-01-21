@@ -5,6 +5,23 @@ extends CharacterBody3D
 signal selected
 signal deselected
 
+enum Role { RIFLEMAN, TEAM_LEADER, AUTOMATIC_RIFLEMAN, GRENADIER }
+
+const ROLE_TAGS: Dictionary = {
+	Role.RIFLEMAN: &"rifleman",
+	Role.TEAM_LEADER: &"team_leader",
+	Role.AUTOMATIC_RIFLEMAN: &"automatic_rifleman",
+	Role.GRENADIER: &"grenadier",
+}
+
+const ROLE_COLORS: Dictionary = {
+	Role.RIFLEMAN: Color(0.3, 0.3, 0.3),           # Gray
+	Role.TEAM_LEADER: Color(0.2, 0.4, 0.8),        # Blue
+	Role.AUTOMATIC_RIFLEMAN: Color(0.8, 0.2, 0.2), # Red
+	Role.GRENADIER: Color(0.2, 0.7, 0.2),          # Green
+}
+
+@export var role: Role = Role.RIFLEMAN
 @export var move_speed: float = 5.0
 @export var arrival_threshold: float = 0.2
 
@@ -17,10 +34,28 @@ var _target_rotation: float = NAN  # Target Y rotation (radians), NAN means face
 var _has_target: bool = false
 
 @onready var _selection_indicator: MeshInstance3D = $SelectionIndicator
+@onready var _mesh: MeshInstance3D = $MeshInstance3D
 
 
 func _ready() -> void:
 	_selection_indicator.visible = false
+	_ensure_role_tag()
+	_apply_role_color()
+
+
+func _ensure_role_tag() -> void:
+	var role_tag: StringName = ROLE_TAGS.get(role, &"rifleman")
+	if role_tag not in tags:
+		tags.append(role_tag)
+	# Ensure infantry tag is present for all combat roles
+	if &"infantry" not in tags:
+		tags.append(&"infantry")
+
+
+func _apply_role_color() -> void:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = ROLE_COLORS.get(role, Color.GRAY)
+	_mesh.material_override = mat
 
 
 func _physics_process(delta: float) -> void:

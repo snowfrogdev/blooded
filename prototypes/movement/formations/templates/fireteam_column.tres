@@ -5,26 +5,27 @@
 
 [sub_resource type="Resource" id="slot_0"]
 script = ExtResource("2")
-local_position = Vector3(0.0039967597, -4.220009e-05, 4.0334444)
-required_tags = Array[StringName]([&"infantry"])
+local_position = Vector3(0.0019619465, -4.220009e-05, -0.0064578056)
+required_tags = Array[StringName]([&"team_leader"])
 priority = 10
 
 [sub_resource type="Resource" id="slot_1"]
 script = ExtResource("2")
-local_position = Vector3(0.0039967597, -4.220009e-05, 0.009701252)
-required_tags = Array[StringName]([&"infantry"])
-priority = 5
+local_position = Vector3(0.007932425, -4.220009e-05, -3.4754558)
+required_tags = Array[StringName]([&"automatic_rifleman"])
+priority = 8
 
 [sub_resource type="Resource" id="slot_2"]
 script = ExtResource("2")
-local_position = Vector3(0, 0, -4)
-required_tags = Array[StringName]([&"infantry"])
-priority = 5
+local_position = Vector3(0.012758493, -4.220009e-05, -7.01856)
+required_tags = Array[StringName]([&"grenadier"])
+priority = 6
 
 [sub_resource type="Resource" id="slot_3"]
 script = ExtResource("2")
-local_position = Vector3(0.003799796, -4.220009e-05, -8.007903)
-required_tags = Array[StringName]([&"infantry"])
+local_position = Vector3(0.010568261, -4.220009e-05, -10.466715)
+required_tags = Array[StringName]([&"rifleman"])
+priority = 4
 
 [resource]
 script = ExtResource("1")
