@@ -47,6 +47,12 @@ enum State {
 		if Engine.is_editor_hint():
 			_update_editor_preview()
 
+## Minimum distance for any rotation to occur (below this, formation maintains facing)
+@export var min_rotation_distance: float = 2.0
+
+## Distance at which full rotation occurs (above this, formation fully rotates to face target)
+@export var full_rotation_distance: float = 10.0
+
 ## Show slot positions in editor
 @export var show_preview: bool = true:
 	set(value):
@@ -61,10 +67,25 @@ var _state: State = State.DISBANDED
 var _slot_assignments: Dictionary = {}  # int (slot_index) -> Node3D (Unit or FormationInstance)
 var _target_position: Vector3
 var _target_rotation: float = 0.0
+var _start_rotation: float = 0.0  # Rotation when move command was issued
+var _rotation_factor: float = 1.0  # How much to rotate (0 = none, 1 = full)
 var _has_target: bool = false
 var _destination_markers: Node3D = null
 var _marker_fade_time: float = 0.0
 const MARKER_FADE_DURATION: float = 2.0
+
+
+## Calculates how much the formation should rotate based on move distance.
+## Returns 0.0 for distances <= min_rotation_distance (no rotation)
+## Returns 1.0 for distances >= full_rotation_distance (full rotation)
+## Returns interpolated value for distances in between
+func _calculate_rotation_factor(distance: float) -> float:
+	if distance <= min_rotation_distance:
+		return 0.0
+	if distance >= full_rotation_distance:
+		return 1.0
+	# Linear interpolation between thresholds
+	return (distance - min_rotation_distance) / (full_rotation_distance - min_rotation_distance)
 
 
 
@@ -114,6 +135,8 @@ func _update_anchor_movement(delta: float) -> void:
 
 	if to_target.length() <= 0.1:
 		_has_target = false
+		# Snap to final target rotation on arrival
+		rotation.y = _target_rotation
 		if _all_units_in_position():
 			_set_state(State.FORMED)
 		else:
@@ -121,10 +144,9 @@ func _update_anchor_movement(delta: float) -> void:
 	else:
 		var direction := to_target.normalized()
 		global_position += direction * move_speed * delta
-		# Smoothly rotate toward movement direction
-		# +Z is forward in Godot, atan2(x, z) gives angle from +Z toward +X
-		var target_angle := atan2(direction.x, direction.z)
-		rotation.y = lerp_angle(rotation.y, target_angle, delta * 5.0)
+		# Smoothly rotate toward target rotation (which was calculated based on distance)
+		# The _target_rotation already accounts for distance-based rotation factor
+		rotation.y = lerp_angle(rotation.y, _target_rotation, delta * 5.0)
 
 
 func _command_units_to_slots(include_rotation: bool) -> void:
@@ -383,16 +405,27 @@ func switch_to_template_by_name(template_name: String) -> bool:
 func command_move(target: Vector3, target_rot: float = NAN) -> void:
 	_target_position = target
 	_has_target = true
+	_start_rotation = rotation.y  # Store current rotation for interpolation
 
-	# Calculate rotation based on movement direction unless explicitly specified
+	# Calculate rotation based on movement direction and distance
+	var to_target := target - global_position
+	to_target.y = 0
+	var distance := to_target.length()
+
 	if is_nan(target_rot):
-		var to_target := target - global_position
-		to_target.y = 0
-		if to_target.length() > 0.1:
-			_target_rotation = atan2(to_target.x, to_target.z)
+		if distance > 0.1:
+			# Calculate desired rotation toward target
+			var desired_rotation := atan2(to_target.x, to_target.z)
+			# Scale rotation amount by distance
+			_rotation_factor = _calculate_rotation_factor(distance)
+			_target_rotation = lerp_angle(rotation.y, desired_rotation, _rotation_factor)
 		else:
-			_target_rotation = rotation.y  # No movement, keep current
+			# No significant movement, keep current rotation
+			_rotation_factor = 0.0
+			_target_rotation = rotation.y
 	else:
+		# Explicit rotation provided, use it fully
+		_rotation_factor = 1.0
 		_target_rotation = target_rot
 
 	# Show destination markers with the rotation the formation will have when it arrives
