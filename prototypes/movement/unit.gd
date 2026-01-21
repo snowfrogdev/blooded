@@ -1,3 +1,4 @@
+@tool
 class_name Unit
 extends CharacterBody3D
 ## Selectable, movable RTS unit with click-to-move functionality.
@@ -21,7 +22,11 @@ const ROLE_COLORS: Dictionary = {
 	Role.GRENADIER: Color(0.2, 0.7, 0.2),          # Green
 }
 
-@export var role: Role = Role.RIFLEMAN
+@export var role: Role = Role.RIFLEMAN:
+	set(value):
+		role = value
+		if is_inside_tree():
+			_apply_role_color()
 @export var move_speed: float = 5.0
 @export var arrival_threshold: float = 0.2
 
@@ -38,9 +43,11 @@ var _has_target: bool = false
 
 
 func _ready() -> void:
+	_apply_role_color()
+	if Engine.is_editor_hint():
+		return
 	_selection_indicator.visible = false
 	_ensure_role_tag()
-	_apply_role_color()
 
 
 func _ensure_role_tag() -> void:
@@ -59,6 +66,8 @@ func _apply_role_color() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if _has_target:
 		var to_target := _target_position - global_position
 		to_target.y = 0  # Ignore vertical difference for distance check
