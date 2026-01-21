@@ -224,6 +224,20 @@ func _update_editor_preview() -> void:
 		_preview_container.add_child(mesh_instance)
 		_preview_meshes.append(mesh_instance)
 
+		# Add label showing slot index and distance
+		var label := Label3D.new()
+		var distance: float = (slot.local_position * spacing_scale).length()
+		label.text = "%d: %.1fm" % [i, distance]
+		label.font_size = 32
+		label.position = local_pos + Vector3(0.3, 1.2, 0.3)  # Offset above and to the side
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.no_depth_test = true  # Always visible
+		label.shaded = false
+		label.outline_size = 8
+		label.modulate = Color.WHITE
+		label.outline_modulate = Color.BLACK
+		_preview_container.add_child(label)
+
 	# Add center marker
 	var center_mesh := MeshInstance3D.new()
 	var cylinder := CylinderMesh.new()

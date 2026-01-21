@@ -8,6 +8,7 @@ func _init() -> void:
 	# Create handle material - billboard=true makes handles face camera
 	create_handle_material("slot_handle", false, null)
 	create_material("lines", Color(0.5, 0.5, 0.5, 0.7), false, true)
+	create_material("label_text", Color(1.0, 1.0, 1.0, 1.0), false, false)
 
 
 func _get_gizmo_name() -> String:
