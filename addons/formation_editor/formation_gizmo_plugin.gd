@@ -20,13 +20,13 @@ func _get_priority() -> int:
 
 
 func _has_gizmo(node: Node3D) -> bool:
-	return node is FormationInstance
+	return node is Formation
 
 
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
 
-	var formation := gizmo.get_node_3d() as FormationInstance
+	var formation := gizmo.get_node_3d() as Formation
 	if formation == null:
 		return
 
@@ -45,7 +45,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	for i in slots.size():
 		var slot = slots[i]
 		var pos: Vector3 = slot.local_position * formation.spacing_scale
-		pos.y += 0.5  # Elevate handles slightly
+		pos.y += 0.5 # Elevate handles slightly
 		handles.append(pos)
 
 		# Draw line from center to slot
@@ -68,7 +68,7 @@ func _get_handle_name(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool)
 
 
 func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool) -> Variant:
-	var formation := gizmo.get_node_3d() as FormationInstance
+	var formation := gizmo.get_node_3d() as Formation
 	if formation == null:
 		return Vector3.ZERO
 
@@ -80,7 +80,7 @@ func _get_handle_value(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool
 
 
 func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, camera: Camera3D, screen_pos: Vector2) -> void:
-	var formation := gizmo.get_node_3d() as FormationInstance
+	var formation := gizmo.get_node_3d() as Formation
 	if formation == null:
 		return
 
@@ -107,7 +107,7 @@ func _set_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, came
 
 
 func _commit_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, restore: Variant, cancel: bool) -> void:
-	var formation := gizmo.get_node_3d() as FormationInstance
+	var formation := gizmo.get_node_3d() as Formation
 	if formation == null:
 		return
 
@@ -132,7 +132,7 @@ func _commit_handle(gizmo: EditorNode3DGizmo, handle_id: int, secondary: bool, r
 	undo_redo.add_do_method(formation, "_update_editor_preview")
 	undo_redo.add_undo_method(formation, "update_gizmos")
 	undo_redo.add_undo_method(formation, "_update_editor_preview")
-	undo_redo.commit_action(false)  # false = don't execute do, already done
+	undo_redo.commit_action(false) # false = don't execute do, already done
 
 	# Save the template resource to disk
 	if template.resource_path != "":

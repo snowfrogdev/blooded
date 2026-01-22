@@ -6,7 +6,7 @@ extends Node3D
 signal selection_changed(units: Array[Unit])
 
 @export_node_path("Camera3D") var camera_path: NodePath
-@export var formation_instance: FormationInstance
+@export var formation_instance: Formation
 
 const TERRAIN_LAYER := 1
 const UNIT_LAYER := 2
