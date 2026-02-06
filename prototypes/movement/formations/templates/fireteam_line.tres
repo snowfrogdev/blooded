@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="FormationTemplate" load_steps=7 format=3 uid="uid://d4cx7fht04jm"]
+[gd_resource type="Resource" script_class="FormationTemplate" format=3 uid="uid://d4cx7fht04jm"]
 
 [ext_resource type="Script" uid="uid://cu30hvdtw4fl8" path="res://prototypes/movement/formations/resources/formation_template.gd" id="1"]
 [ext_resource type="Script" uid="uid://bida3gqn1fxt3" path="res://prototypes/movement/formations/resources/slot_definition.gd" id="2"]
