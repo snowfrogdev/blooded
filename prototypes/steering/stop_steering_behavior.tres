@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="StopSteeringBehavior" format=3 uid="uid://dq1s0irvh1u52"]
+
+[ext_resource type="Script" uid="uid://d24pbk0kk2x06" path="res://prototypes/steering/stop_steering_behavior.gd" id="1_enwqf"]
+
+[resource]
+script = ExtResource("1_enwqf")
+metadata/_custom_type_script = "uid://d24pbk0kk2x06"

@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://bfb4ijafodwa7"]
+
+[ext_resource type="Script" uid="uid://bnf4wta4e8l4l" path="res://prototypes/steering/unit.gd" id="1_unit"]
+[ext_resource type="Script" uid="uid://0njkeposte6i" path="res://prototypes/steering/kinematic/kinematic_3d.gd" id="2_gk3ja"]
+[ext_resource type="Script" uid="uid://d3xy8rq5avoyc" path="res://prototypes/steering/steering_pipeline/steering_pipeline_3d.gd" id="3_b4fmm"]
+[ext_resource type="Resource" uid="uid://bbwdwcn7w0tax" path="res://prototypes/steering/move_to_targeter.tres" id="4_uxfk2"]
+[ext_resource type="Script" uid="uid://bwodqsdg38fr3" path="res://prototypes/steering/steering_pipeline/targeter_3d.gd" id="4_x85kt"]
+[ext_resource type="Resource" uid="uid://2nlevk8yncjg" path="res://prototypes/steering/arrive_actuator.tres" id="5_lt827"]
+[ext_resource type="Resource" uid="uid://dq1s0irvh1u52" path="res://prototypes/steering/stop_steering_behavior.tres" id="6_lt827"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
+albedo_color = Color(0.3, 0.3, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xwgc7"]
+albedo_color = Color(0.27387285, 0.27387273, 0.2738727, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_r3ulc"]
+material = SubResource("StandardMaterial3D_xwgc7")
+radius = 0.3
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yolrm"]
+albedo_color = Color(0.27450982, 0.27450982, 0.27450982, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_txqrf"]
+material = SubResource("StandardMaterial3D_yolrm")
+top_radius = 0.03
+bottom_radius = 0.07
+height = 0.7
+
+[sub_resource type="TorusMesh" id="TorusMesh_select"]
+inner_radius = 0.35
+outer_radius = 0.45
+rings = 32
+ring_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_select"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.9, 0.3, 1)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_it2j7"]
+radius = 0.30810547
+height = 1.8150635
+
+[node name="Unit" type="Node3D" unique_id=777597374]
+script = ExtResource("1_unit")
+
+[node name="Kinematic3D" type="Node" parent="." unique_id=804209967]
+script = ExtResource("2_gk3ja")
+metadata/_custom_type_script = "uid://0njkeposte6i"
+
+[node name="SteeringPipeline" type="Node" parent="." unique_id=397245993 node_paths=PackedStringArray("kinematic")]
+script = ExtResource("3_b4fmm")
+targeters = Array[ExtResource("4_x85kt")]([ExtResource("4_uxfk2")])
+actuator = ExtResource("5_lt827")
+kinematic = NodePath("../Kinematic3D")
+deadlock_fallback = ExtResource("6_lt827")
+metadata/_custom_type_script = "uid://d3xy8rq5avoyc"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1985815437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.90122396, 0)
+material_override = SubResource("StandardMaterial3D_txqrf")
+mesh = SubResource("CapsuleMesh_r3ulc")
+
+[node name="Gun" type="MeshInstance3D" parent="." unique_id=1129905743]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, -0.15805808, 1.19187, 0.51853335)
+mesh = SubResource("CylinderMesh_txqrf")
+
+[node name="SelectionIndicator" type="MeshInstance3D" parent="." unique_id=210669763]
+transform = Transform3D(1, 0, 0, 0, 0.99996555, -0.008307591, 0, 0.008307591, 0.99996555, 0, 0.050140202, 0)
+mesh = SubResource("TorusMesh_select")
+surface_material_override/0 = SubResource("StandardMaterial3D_select")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=639225238]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1377612686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.90060925, 0)
+shape = SubResource("CapsuleShape3D_it2j7")

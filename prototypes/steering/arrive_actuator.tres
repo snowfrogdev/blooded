@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ArriveActuator" format=3 uid="uid://2nlevk8yncjg"]
+
+[ext_resource type="Script" uid="uid://cx4knuc80x0r5" path="res://prototypes/steering/arrive_actuator.gd" id="1_xvh04"]
+
+[resource]
+script = ExtResource("1_xvh04")
+slow_radius = 2.0
+metadata/_custom_type_script = "uid://cx4knuc80x0r5"

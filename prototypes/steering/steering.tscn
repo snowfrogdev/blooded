@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://dcdrqtpv2ydcw"]
+
+[ext_resource type="PackedScene" uid="uid://dg4kxr8mv2qwp" path="res://prototypes/rts_camera/rts_camera.tscn" id="1_gwcnc"]
+[ext_resource type="Terrain3DAssets" uid="uid://cdh03jn10jbb4" path="res://prototypes/steering/terrain_3d_assets.tres" id="2_j8gha"]
+[ext_resource type="Script" uid="uid://dbndw8p05yam7" path="res://addons/terrain_3d/utils/terrain_3d_objects.gd" id="3_sxr3c"]
+[ext_resource type="Script" uid="uid://c4j7v7uyll2x6" path="res://prototypes/movement/selection_controller.gd" id="4_sxr3c"]
+[ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="5_gwcnc"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
+sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
+ground_bottom_color = Color(0.6392157, 0.99607843, 0.8901961, 1)
+ground_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
+
+[sub_resource type="Sky" id="Sky_j362r"]
+sky_material = SubResource("ProceduralSkyMaterial_yesmu")
+
+[sub_resource type="Environment" id="Environment_g81bf"]
+background_mode = 2
+sky = SubResource("Sky_j362r")
+ambient_light_source = 3
+ambient_light_sky_contribution = 0.12
+tonemap_mode = 2
+
+[sub_resource type="Gradient" id="Gradient_o5kat"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_a01ky"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_j8gha"]
+noise = SubResource("FastNoiseLite_a01ky")
+color_ramp = SubResource("Gradient_o5kat")
+seamless = true
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_sxr3c"]
+_shader_parameters = {
+&"bias_distance": 512.0,
+&"blend_sharpness": 0.5,
+&"depth_blur": 0.0,
+&"enable_macro_variation": true,
+&"enable_projection": true,
+&"flat_terrain_normals": false,
+&"macro_variation1": Color(1, 1, 1, 1),
+&"macro_variation2": Color(1, 1, 1, 1),
+&"macro_variation_slope": 0.333,
+&"mipmap_bias": 1.0,
+&"noise1_angle": 0.0,
+&"noise1_offset": Vector2(0.5, 0.5),
+&"noise1_scale": 0.04,
+&"noise2_scale": 0.076,
+&"noise_texture": SubResource("NoiseTexture2D_j8gha"),
+&"projection_threshold": 0.8
+}
+
+[node name="Steering" type="Node3D" unique_id=1229144812]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=774372653]
+environment = SubResource("Environment_g81bf")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1963648166]
+transform = Transform3D(-0.8660254, 0.4330127, -0.25, 0, 0.5, 0.86602545, 0.49999997, 0.75000006, -0.43301272, 0, 19.761995, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 250.0
+
+[node name="RTSCamera" parent="." unique_id=1845781747 instance=ExtResource("1_gwcnc")]
+zoom_min_distance = 10.0
+tilt_offset_max = 20.0
+invert_tilt = true
+
+[node name="Terrain3D" type="Terrain3D" parent="." unique_id=660459018]
+data_directory = "res://prototypes/steering/terrain_data"
+material = SubResource("Terrain3DMaterial_sxr3c")
+assets = ExtResource("2_j8gha")
+top_level = true
+metadata/_edit_lock_ = true
+
+[node name="Terrain3DObjects" type="Node3D" parent="." unique_id=524160328]
+script = ExtResource("3_sxr3c")
+metadata/_custom_type_script = "uid://dbndw8p05yam7"
+
+[node name="SelectionController" type="Node3D" parent="." unique_id=418577478 node_paths=PackedStringArray("camera_node")]
+script = ExtResource("4_sxr3c")
+camera_node = NodePath("../RTSCamera")
+metadata/_custom_type_script = "uid://c4j7v7uyll2x6"
+
+[node name="Unit" parent="." unique_id=777597374 instance=ExtResource("5_gwcnc")]
