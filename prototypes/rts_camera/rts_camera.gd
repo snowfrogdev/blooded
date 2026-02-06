@@ -232,3 +232,7 @@ func _apply_tilt_immediate() -> void:
 	var target_pitch := base_pitch + deg_to_rad(_tilt_offset)
 	target_pitch = clampf(target_pitch, deg_to_rad(-85.0), deg_to_rad(-10.0))
 	_gimbal.rotation.x = target_pitch
+
+
+func get_camera() -> Camera3D:
+	return _camera

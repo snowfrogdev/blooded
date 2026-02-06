@@ -5,7 +5,8 @@ extends Node3D
 
 signal selection_changed(units: Array[Unit])
 
-@export_node_path("Camera3D") var camera_path: NodePath
+## The camera used for raycasting. Accepts a Camera3D or a node with a get_camera() method.
+@export var camera_node: Node3D
 @export var formation_instance: Formation
 
 const TERRAIN_LAYER := 1
@@ -16,8 +17,13 @@ var _selected_units: Array[Unit] = []
 
 
 func _ready() -> void:
-	if camera_path:
-		_camera = get_node(camera_path) as Camera3D
+	if camera_node:
+		if camera_node is Camera3D:
+			_camera = camera_node
+		elif camera_node.has_method("get_camera"):
+			var result: Variant = camera_node.get_camera()
+			if result is Camera3D:
+				_camera = result
 	if not _camera:
 		push_error("SelectionController: No camera assigned")
 
@@ -44,6 +50,8 @@ func _handle_select(screen_pos: Vector2) -> void:
 
 	if result.collider is Unit:
 		_select_unit(result.collider)
+	elif result.collider.owner is Unit:
+		_select_unit(result.collider.owner)
 	else:
 		# Clicked ground or non-unit object
 		_deselect_all()
@@ -80,6 +88,7 @@ func _raycast(screen_pos: Vector2, mask: int) -> Dictionary:
 	var origin := _camera.project_ray_origin(screen_pos)
 	var end := origin + _camera.project_ray_normal(screen_pos) * 1000.0
 	var query := PhysicsRayQueryParameters3D.create(origin, end, mask)
+	query.collide_with_areas = true
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 
