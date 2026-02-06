@@ -1,12 +1,12 @@
 @tool
-class_name Unit
+class_name UnitOld
 extends CharacterBody3D
 ## Selectable, movable RTS unit with click-to-move functionality.
 
 signal selected
 signal deselected
 
-enum Role { RIFLEMAN, TEAM_LEADER, AUTOMATIC_RIFLEMAN, GRENADIER }
+enum Role {RIFLEMAN, TEAM_LEADER, AUTOMATIC_RIFLEMAN, GRENADIER}
 
 const ROLE_TAGS: Dictionary = {
 	Role.RIFLEMAN: &"rifleman",
@@ -16,10 +16,10 @@ const ROLE_TAGS: Dictionary = {
 }
 
 const ROLE_COLORS: Dictionary = {
-	Role.RIFLEMAN: Color(0.3, 0.3, 0.3),           # Gray
-	Role.TEAM_LEADER: Color(0.2, 0.4, 0.8),        # Blue
+	Role.RIFLEMAN: Color(0.3, 0.3, 0.3), # Gray
+	Role.TEAM_LEADER: Color(0.2, 0.4, 0.8), # Blue
 	Role.AUTOMATIC_RIFLEMAN: Color(0.8, 0.2, 0.2), # Red
-	Role.GRENADIER: Color(0.2, 0.7, 0.2),          # Green
+	Role.GRENADIER: Color(0.2, 0.7, 0.2), # Green
 }
 
 @export var role: Role = Role.RIFLEMAN:
@@ -35,7 +35,7 @@ const ROLE_COLORS: Dictionary = {
 
 var _is_selected: bool = false
 var _target_position: Vector3
-var _target_rotation: float = NAN  # Target Y rotation (radians), NAN means face movement direction
+var _target_rotation: float = NAN # Target Y rotation (radians), NAN means face movement direction
 var _has_target: bool = false
 
 @onready var _selection_indicator: MeshInstance3D = $SelectionIndicator
@@ -70,7 +70,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if _has_target:
 		var to_target := _target_position - global_position
-		to_target.y = 0  # Ignore vertical difference for distance check
+		to_target.y = 0 # Ignore vertical difference for distance check
 
 		if to_target.length() <= arrival_threshold:
 			_has_target = false

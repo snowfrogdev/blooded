@@ -1,9 +1,9 @@
-[gd_scene load_steps=33 format=3 uid="uid://drcxved8aisb7"]
+[gd_scene format=3 uid="uid://drcxved8aisb7"]
 
 [ext_resource type="Texture2D" uid="uid://ced6h8kgioncw" path="res://prototypes/movement/proto_grass.png" id="1_ff5wu"]
 [ext_resource type="Script" uid="uid://dh2bdlfofxix1" path="res://prototypes/movement/formation_test.gd" id="1_wgkxk"]
 [ext_resource type="Script" uid="uid://dbndw8p05yam7" path="res://addons/terrain_3d/utils/terrain_3d_objects.gd" id="2_r3ulc"]
-[ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/movement/unit.tscn" id="3_gjl5l"]
+[ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="3_gjl5l"]
 [ext_resource type="PackedScene" uid="uid://dg4kxr8mv2qwp" path="res://prototypes/rts_camera/rts_camera.tscn" id="4_camera"]
 [ext_resource type="Texture2D" uid="uid://bm7qq5iutk11b" path="res://prototypes/movement/proto_water.png" id="5_h2bk3"]
 [ext_resource type="Script" uid="uid://cqnwokjm13jpe" path="res://prototypes/movement/formations/runtime/formation.gd" id="5_j362r"]
@@ -27,10 +27,6 @@ sky = SubResource("Sky_j362r")
 ambient_light_source = 3
 ambient_light_sky_contribution = 0.12
 tonemap_mode = 2
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_1ssor"]
-vertices = PackedVector3Array(-255.50526, 0.25025, -255.50526, -255.50526, 0.25025, 255.255, 255.255, 0.25025, 255.255, 255.255, 0.25025, -255.50526, -20.5205, 4.25425, -4.25425, -52.052002, 0.25025, -37.037003, -55.055004, 0.25025, 34.78475, 36.28625, 0.25025, -55.055004, 39.289253, 0.25025, 52.802753, -28.028002, 1.7517501, -13.0130005, -11.5115, 2.2522502, -11.5115, -28.028002, 2.002, 4.7547503, -10.01, 2.2522502, 4.7547503, -5.5055003, 1.5015001, 42.29225, -26.5265, 0.25025, 60.310253, 37.78775, 1.25125, 7.7577505, 58.808754, 0.25025, 30.28025, -28.028002, 2.7527502, -5.5055003, -20.5205, 3.0030003, 4.7547503, -11.5115, 1.25125, -43.043003, -28.028002, 0.25025, -58.058002, -31.031002, 1.7517501, -8.5085, 45.295254, 1.001, -16.016, 58.808754, 0.25025, -31.031002, -20.5205, 3.2532501, -10.01, -11.76175, 3.0030003, -5.5055003, -22.022001, 2.5025, -13.0130005, -7.2572503, 2.2522502, -4.25425, -29.529501, 2.5025, -2.5025, -50.550503, 1.001, -4.004, -35.535503, 1.5015001, -2.5025, -19.019001, 2.2522502, 9.5095005, -53.5535, 0.75075006, -16.016, 13.763751, 0.75075006, 55.80575, -61.061005, 0.25025, -23.77375, 21.271252, 0.25025, 61.811752, 9.259251, 1.7517501, -29.529501, 15.265251, 1.7517501, 30.28025, 12.262251, 0.75075006, -55.055004, 19.76975, 0.25025, -61.061005, -17.5175, 4.004, -1.25125, -22.022001, 4.004, -1.25125, -20.5205, 2.002, -16.016, 55.80575, 0.75075006, 1.7517501, -17.5175, 3.75375, -7.2572503, -7.0070004, 2.2522502, 21.271252, -55.055004, 0.75075006, 12.262251, -28.028002, 1.25125, 37.78775, 25.775751, 1.25125, 3.5035002, 2.002, 2.2522502, 5.005, -22.022001, 3.75375, -7.0070004)
-polygons = [PackedInt32Array(2, 23, 3), PackedInt32Array(3, 39, 0), PackedInt32Array(0, 34, 1), PackedInt32Array(1, 35, 2), PackedInt32Array(23, 7, 3), PackedInt32Array(2, 16, 23), PackedInt32Array(39, 20, 0), PackedInt32Array(3, 7, 39), PackedInt32Array(34, 6, 1), PackedInt32Array(0, 5, 34), PackedInt32Array(35, 8, 2), PackedInt32Array(1, 14, 35), PackedInt32Array(23, 22, 7), PackedInt32Array(16, 43, 23), PackedInt32Array(2, 8, 16), PackedInt32Array(20, 5, 0), PackedInt32Array(39, 38, 20), PackedInt32Array(7, 38, 39), PackedInt32Array(6, 14, 1), PackedInt32Array(34, 46, 6), PackedInt32Array(5, 32, 34), PackedInt32Array(35, 33, 8), PackedInt32Array(14, 33, 35), PackedInt32Array(22, 36, 7), PackedInt32Array(23, 43, 22), PackedInt32Array(16, 15, 43), PackedInt32Array(8, 37, 16), PackedInt32Array(20, 19, 5), PackedInt32Array(38, 19, 20), PackedInt32Array(7, 36, 38), PackedInt32Array(6, 47, 14), PackedInt32Array(46, 47, 6), PackedInt32Array(34, 29, 46), PackedInt32Array(32, 29, 34), PackedInt32Array(5, 9, 32), PackedInt32Array(33, 37, 8), PackedInt32Array(14, 13, 33), PackedInt32Array(22, 48, 36), PackedInt32Array(43, 15, 22), PackedInt32Array(16, 37, 15), PackedInt32Array(19, 42, 5), PackedInt32Array(38, 36, 19), PackedInt32Array(47, 13, 14), PackedInt32Array(46, 11, 47), PackedInt32Array(29, 30, 46), PackedInt32Array(32, 21, 29), PackedInt32Array(9, 21, 32), PackedInt32Array(5, 42, 9), PackedInt32Array(33, 13, 37), PackedInt32Array(48, 49, 36), PackedInt32Array(22, 15, 48), PackedInt32Array(37, 48, 15), PackedInt32Array(19, 10, 42), PackedInt32Array(36, 10, 19), PackedInt32Array(47, 45, 13), PackedInt32Array(11, 31, 47), PackedInt32Array(46, 30, 11), PackedInt32Array(29, 21, 30), PackedInt32Array(9, 17, 21), PackedInt32Array(42, 26, 9), PackedInt32Array(13, 45, 37), PackedInt32Array(49, 27, 36), PackedInt32Array(48, 37, 49), PackedInt32Array(10, 24, 42), PackedInt32Array(36, 27, 10), PackedInt32Array(47, 31, 45), PackedInt32Array(11, 18, 31), PackedInt32Array(30, 28, 11), PackedInt32Array(21, 28, 30), PackedInt32Array(17, 28, 21), PackedInt32Array(9, 50, 17), PackedInt32Array(26, 50, 9), PackedInt32Array(42, 24, 26), PackedInt32Array(45, 49, 37), PackedInt32Array(49, 12, 27), PackedInt32Array(10, 44, 24), PackedInt32Array(27, 25, 10), PackedInt32Array(31, 12, 45), PackedInt32Array(18, 12, 31), PackedInt32Array(11, 41, 18), PackedInt32Array(28, 41, 11), PackedInt32Array(17, 41, 28), PackedInt32Array(50, 41, 17), PackedInt32Array(26, 24, 50), PackedInt32Array(45, 12, 49), PackedInt32Array(12, 25, 27), PackedInt32Array(44, 50, 24), PackedInt32Array(10, 25, 44), PackedInt32Array(18, 40, 12), PackedInt32Array(41, 40, 18), PackedInt32Array(50, 4, 41), PackedInt32Array(12, 40, 25), PackedInt32Array(44, 4, 50), PackedInt32Array(25, 40, 44), PackedInt32Array(41, 4, 40), PackedInt32Array(44, 40, 4)]
 
 [sub_resource type="Gradient" id="Gradient_r3ulc"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -154,32 +150,29 @@ uv_scale = 0.25
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_ilq4d")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_gjl5l"), SubResource("Terrain3DTextureAsset_058ax"), SubResource("Terrain3DTextureAsset_qo0sw")])
 
-[node name="Movement" type="Node3D" node_paths=PackedStringArray("formation")]
+[node name="Movement" type="Node3D" unique_id=443033491 node_paths=PackedStringArray("formation")]
 script = ExtResource("1_wgkxk")
 formation = NodePath("Fire Team")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=264681]
 environment = SubResource("Environment_ilq4d")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=113593297]
 transform = Transform3D(-0.8660254, 0.4330127, -0.24999997, 0, 0.49999997, 0.86602545, 0.49999997, 0.75, -0.43301266, 0, 0, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
-[node name="RTSCamera" parent="." instance=ExtResource("4_camera")]
+[node name="RTSCamera" parent="." unique_id=518306647 instance=ExtResource("4_camera")]
 zoom_min_distance = 10.0
 tilt_offset_max = 20.0
 invert_tilt = true
 
-[node name="SelectionController" type="Node3D" parent="." node_paths=PackedStringArray("formation_instance")]
+[node name="SelectionController" type="Node3D" parent="." unique_id=1217220925 node_paths=PackedStringArray("formation_instance")]
 script = ExtResource("5_select")
 camera_path = NodePath("../RTSCamera/Gimbal/CameraArm/Camera3D")
 formation_instance = NodePath("../Fire Team")
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
-navigation_mesh = SubResource("NavigationMesh_1ssor")
-
-[node name="Terrain3D" type="Terrain3D" parent="NavigationRegion3D"]
+[node name="Terrain3D" type="Terrain3D" parent="." unique_id=1451757813]
 data_directory = "res://prototypes/movement/terrain_data"
 material = SubResource("Terrain3DMaterial_r6yu4")
 assets = SubResource("Terrain3DAssets_h2bk3")
@@ -187,11 +180,11 @@ collision_mode = 4
 top_level = true
 metadata/_edit_lock_ = true
 
-[node name="Terrain3DObjects" type="Node3D" parent="."]
+[node name="Terrain3DObjects" type="Node3D" parent="." unique_id=2034360815]
 script = ExtResource("2_r3ulc")
 metadata/_custom_type_script = "uid://dbndw8p05yam7"
 
-[node name="Fire Team" type="Node3D" parent="."]
+[node name="Fire Team" type="Node3D" parent="." unique_id=279938310]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7127404, 2.0876887, -3.0421786)
 script = ExtResource("5_j362r")
 templates = Array[Resource]([ExtResource("8_h2bk3"), ExtResource("6_id864"), ExtResource("7_wgkxk")])
@@ -199,17 +192,14 @@ active_template_index = 2
 full_rotation_distance = 15.0
 metadata/_custom_type_script = "uid://cqnwokjm13jpe"
 
-[node name="Unit" parent="." instance=ExtResource("3_gjl5l")]
+[node name="Unit" parent="." unique_id=380230456 instance=ExtResource("3_gjl5l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9655042, 0)
-role = 1
 
-[node name="Unit4" parent="." instance=ExtResource("3_gjl5l")]
+[node name="Unit4" parent="." unique_id=1161665354 instance=ExtResource("3_gjl5l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.791399, 2.9655042, 0)
 
-[node name="Unit3" parent="." instance=ExtResource("3_gjl5l")]
+[node name="Unit3" parent="." unique_id=8753243 instance=ExtResource("3_gjl5l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5152545, 2.9655042, 0)
-role = 2
 
-[node name="Unit2" parent="." instance=ExtResource("3_gjl5l")]
+[node name="Unit2" parent="." unique_id=935650390 instance=ExtResource("3_gjl5l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0807028, 2.9655042, 0)
-role = 3
