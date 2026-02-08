@@ -77,7 +77,7 @@ zoom_min_distance = 10.0
 tilt_offset_max = 20.0
 invert_tilt = true
 
-[node name="Terrain3D" type="Terrain3D" parent="." unique_id=660459018]
+[node name="Terrain3D" type="Terrain3D" parent="." unique_id=660459018 groups=["terrain"]]
 data_directory = "res://prototypes/steering/terrain_data"
 material = SubResource("Terrain3DMaterial_sxr3c")
 assets = ExtResource("2_j8gha")

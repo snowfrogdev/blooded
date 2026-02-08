@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="Terrain3DHeightProvider" format=3 uid="uid://gye6atp68t87"]
+
+[ext_resource type="Script" uid="uid://cxiyypwfyi14c" path="res://prototypes/steering/terrain_3d_height_provider.gd" id="1_j1hmx"]
+
+[resource]
+script = ExtResource("1_j1hmx")
+metadata/_custom_type_script = "uid://cxiyypwfyi14c"
