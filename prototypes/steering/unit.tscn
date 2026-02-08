@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bwodqsdg38fr3" path="res://prototypes/steering/steering_pipeline/targeter_3d.gd" id="4_x85kt"]
 [ext_resource type="Resource" uid="uid://2nlevk8yncjg" path="res://prototypes/steering/arrive_actuator.tres" id="5_lt827"]
 [ext_resource type="Resource" uid="uid://dq1s0irvh1u52" path="res://prototypes/steering/stop_steering_behavior.tres" id="6_lt827"]
+[ext_resource type="Script" path="res://prototypes/steering/moveable_3d.gd" id="7_moveable"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
 albedo_color = Color(0.3, 0.3, 0.3, 1)
@@ -44,6 +45,9 @@ height = 1.8150635
 
 [node name="Unit" type="Node3D" unique_id=777597374]
 script = ExtResource("1_unit")
+
+[node name="Moveable3D" type="Node" parent="."]
+script = ExtResource("7_moveable")
 
 [node name="Kinematic3D" type="Node" parent="." unique_id=804209967]
 script = ExtResource("2_gk3ja")
