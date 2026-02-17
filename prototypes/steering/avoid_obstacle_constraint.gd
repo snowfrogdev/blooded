@@ -16,6 +16,9 @@ class_name AvoidObstacleConstraint extends Constraint3D
 var _collider: Node3D
 var _segment_start: Vector3
 var _segment_end: Vector3
+# Side commitment — prevents oscillation when the same obstacle is detected across frames.
+var _committed_collider: Node3D
+var _committed_position: Vector3
 
 ## Debug state — populated when debug_enabled is true, read by SteeringDebugDraw.
 var debug_rays: Array[Dictionary] = []
@@ -96,7 +99,7 @@ func _cast_whisker_rays(space_state: PhysicsDirectSpaceState3D, from: Vector3, t
 	return first_hit
 
 
-func suggest(_agent: Node3D, _path: SteeringPath3D, goal: Goal3D) -> Goal3D:
+func suggest(agent: Node3D, _path: SteeringPath3D, goal: Goal3D) -> Goal3D:
 	var new_goal := Goal3D.new()
 	new_goal.merge_from(goal)
 
@@ -123,12 +126,32 @@ func suggest(_agent: Node3D, _path: SteeringPath3D, goal: Goal3D) -> Goal3D:
 	var candidate_a := center_xz + perp * offset
 	var candidate_b := center_xz - perp * offset
 
-	# Pick the candidate closer to the original goal (shorter detour).
-	var goal_xz := Vector3(goal.position.x, 0.0, goal.position.z)
-	if candidate_a.distance_squared_to(goal_xz) <= candidate_b.distance_squared_to(goal_xz):
-		new_goal.position = Vector3(candidate_a.x, goal.position.y, candidate_a.z)
+	if _collider == _committed_collider and is_instance_valid(_committed_collider):
+		# Same obstacle — pick whichever candidate is closer to our committed position.
+		if candidate_a.distance_squared_to(_committed_position) <= candidate_b.distance_squared_to(_committed_position):
+			new_goal.position = Vector3(candidate_a.x, goal.position.y, candidate_a.z)
+		else:
+			new_goal.position = Vector3(candidate_b.x, goal.position.y, candidate_b.z)
 	else:
-		new_goal.position = Vector3(candidate_b.x, goal.position.y, candidate_b.z)
+		# New obstacle — validate with point overlap, then commit.
+		var space_state := agent.get_world_3d().direct_space_state
+		var check_y := agent.global_position.y + 0.5
+		var a_blocked := _is_point_inside_obstacle(space_state, Vector3(candidate_a.x, check_y, candidate_a.z))
+		var b_blocked := _is_point_inside_obstacle(space_state, Vector3(candidate_b.x, check_y, candidate_b.z))
+
+		if a_blocked and not b_blocked:
+			new_goal.position = Vector3(candidate_b.x, goal.position.y, candidate_b.z)
+		elif b_blocked and not a_blocked:
+			new_goal.position = Vector3(candidate_a.x, goal.position.y, candidate_a.z)
+		else:
+			var goal_xz := Vector3(goal.position.x, 0.0, goal.position.z)
+			if candidate_a.distance_squared_to(goal_xz) <= candidate_b.distance_squared_to(goal_xz):
+				new_goal.position = Vector3(candidate_a.x, goal.position.y, candidate_a.z)
+			else:
+				new_goal.position = Vector3(candidate_b.x, goal.position.y, candidate_b.z)
+
+	_committed_collider = _collider
+	_committed_position = Vector3(new_goal.position.x, 0.0, new_goal.position.z)
 
 	if debug_enabled:
 		debug_obstacle_center = center_xz
@@ -139,6 +162,19 @@ func suggest(_agent: Node3D, _path: SteeringPath3D, goal: Goal3D) -> Goal3D:
 
 	new_goal.has_position = true
 	return new_goal
+
+## Returns true if the given point is inside any obstacle shape (excluding the
+## currently detected collider, to avoid self-detection at small margins).
+func _is_point_inside_obstacle(space_state: PhysicsDirectSpaceState3D, point: Vector3) -> bool:
+	var params := PhysicsPointQueryParameters3D.new()
+	params.position = point
+	params.collision_mask = obstacle_mask
+	params.collide_with_bodies = true
+	params.collide_with_areas = false
+	if _collider:
+		params.exclude = [_collider.get_rid()]
+	return not space_state.intersect_point(params).is_empty()
+
 
 ## Returns how far the obstacle's collision shape extends from its center
 ## along the given world-space direction (support function, XZ only).
