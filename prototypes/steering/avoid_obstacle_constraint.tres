@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AvoidObstacleConstraint" format=3 uid="uid://ddk8oysvyj7e7"]
+
+[ext_resource type="Script" uid="uid://b15l8o4x64tvh" path="res://prototypes/steering/avoid_obstacle_constraint.gd" id="1_mdr1o"]
+
+[resource]
+script = ExtResource("1_mdr1o")
+agent_radius = 0.31
+debug_enabled = true
+metadata/_custom_type_script = "uid://bv70v07o82yy1"
