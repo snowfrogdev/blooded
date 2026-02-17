@@ -14,7 +14,7 @@ extends Kinematic3D
 
 func _ready() -> void:
 	super._ready()
-	if height_provider:
+	if height_provider and not Engine.is_editor_hint():
 		height_provider.setup(self)
 
 func _physics_process(delta: float) -> void:
