@@ -1,4 +1,4 @@
-class_name Constraint3D
+@abstract class_name Constraint3D
 extends Resource
 ## Limits movement by detecting and avoiding obstacles or invalid paths.
 ##
@@ -11,10 +11,6 @@ extends Resource
 ## iterates until all constraints are satisfied or deadlock is detected. In deadlock,
 ## a fallback behavior (e.g., wander or full pathfinding) takes over.
 
-func is_violated(agent: Node3D, kinematic: Kinematic3D, path: SteeringPath3D) -> bool:
-	push_error("Constraint3D.is_violated() must be overridden")
-	return false
+@abstract func is_violated(agent: Node3D, kinematic: Kinematic3D, path: SteeringPath3D) -> bool
 
-func suggest(agent: Node3D, path: SteeringPath3D, goal: Goal3D) -> Goal3D:
-	push_error("Constraint3D.suggest() must be overridden")
-	return goal
+@abstract func suggest(agent: Node3D, path: SteeringPath3D, goal: Goal3D) -> Goal3D
