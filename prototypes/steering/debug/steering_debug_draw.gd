@@ -48,6 +48,20 @@ func _process(_delta: float) -> void:
 		return
 
 	_im.clear_surfaces()
+
+	var has_vertices := false
+	for constraint in _pipeline.constraints:
+		if constraint is AvoidObstacleConstraint and constraint.debug_enabled:
+			if draw_whisker_rays and not constraint.debug_rays.is_empty():
+				has_vertices = true
+			if draw_sub_goals and constraint.debug_violated:
+				has_vertices = true
+			if draw_avoidance_zones and constraint.debug_violated:
+				has_vertices = true
+
+	if not has_vertices:
+		return
+
 	_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
 
 	for constraint in _pipeline.constraints:
