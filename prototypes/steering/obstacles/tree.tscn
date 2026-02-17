@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://clindcm5q8604"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xy2iv"]
+top_radius = 0.3
+height = 3.0
+radial_segments = 16
+
+[sub_resource type="SphereMesh" id="SphereMesh_gvdo3"]
+radius = 2.5
+height = 5.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_jg5op"]
+height = 3.0
+radius = 0.3
+
+[node name="Tree" type="StaticBody3D" unique_id=1860366873]
+collision_layer = 4
+collision_mask = 0
+
+[node name="Trunk" type="MeshInstance3D" parent="." unique_id=138186586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+mesh = SubResource("CylinderMesh_xy2iv")
+
+[node name="Canopy" type="MeshInstance3D" parent="." unique_id=639044104]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+mesh = SubResource("SphereMesh_gvdo3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=726727927]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_jg5op")

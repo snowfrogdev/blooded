@@ -68,6 +68,12 @@ rotate_right={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_1="Terrain"
+3d_physics/layer_2="Units"
+3d_physics/layer_3="Obstacles"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

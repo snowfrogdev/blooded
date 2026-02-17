@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://ncbp41630b43"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_b1"]
+radius = 1.2
+height = 2.4
+
+[sub_resource type="SphereMesh" id="SphereMesh_b2"]
+radius = 0.8
+height = 1.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_b3"]
+radius = 0.9
+height = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cluster"]
+size = Vector3(3.2442017, 1.2, 2.9942017)
+
+[node name="BoulderCluster" type="StaticBody3D" unique_id=1661894616]
+collision_layer = 4
+collision_mask = 0
+
+[node name="Boulder1" type="MeshInstance3D" parent="." unique_id=977180724]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("SphereMesh_b1")
+
+[node name="Boulder2" type="MeshInstance3D" parent="." unique_id=765865930]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0, 0, 0, 1, 1, 0.48, 0.5)
+mesh = SubResource("SphereMesh_b2")
+
+[node name="Boulder3" type="MeshInstance3D" parent="." unique_id=1437457520]
+transform = Transform3D(1, 0, 0, 0, 0.55, 0, 0, 0, 1, -0.5, 0.495, 0.8)
+mesh = SubResource("SphereMesh_b3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2133210663]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20321655, 0.6, 0.2578186)
+shape = SubResource("BoxShape3D_cluster")

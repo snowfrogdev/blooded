@@ -3,8 +3,15 @@
 [ext_resource type="PackedScene" uid="uid://dg4kxr8mv2qwp" path="res://prototypes/rts_camera/rts_camera.tscn" id="1_gwcnc"]
 [ext_resource type="Terrain3DAssets" uid="uid://cdh03jn10jbb4" path="res://prototypes/steering/terrain_3d_assets.tres" id="2_j8gha"]
 [ext_resource type="Script" uid="uid://dbndw8p05yam7" path="res://addons/terrain_3d/utils/terrain_3d_objects.gd" id="3_sxr3c"]
+[ext_resource type="PackedScene" uid="uid://clindcm5q8604" path="res://prototypes/steering/obstacles/tree.tscn" id="4_j1yq2"]
+[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/wall_segment.tscn" id="4_qjys7"]
 [ext_resource type="Script" uid="uid://c4j7v7uyll2x6" path="res://prototypes/movement/selection_controller.gd" id="4_sxr3c"]
 [ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="5_gwcnc"]
+[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/fence.tscn" id="5_rfqfv"]
+[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/building.tscn" id="6_j6ui3"]
+[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/rock.tscn" id="7_ifalb"]
+[ext_resource type="PackedScene" uid="uid://ncbp41630b43" path="res://prototypes/steering/obstacles/boulder_cluster.tscn" id="8_usp30"]
+[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/barrel.tscn" id="9_w3jct"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
 sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
@@ -73,6 +80,7 @@ shadow_enabled = true
 directional_shadow_max_distance = 250.0
 
 [node name="RTSCamera" parent="." unique_id=1845781747 instance=ExtResource("1_gwcnc")]
+move_speed = 50.0
 zoom_min_distance = 10.0
 tilt_offset_max = 20.0
 invert_tilt = true
@@ -87,6 +95,39 @@ metadata/_edit_lock_ = true
 [node name="Terrain3DObjects" type="Node3D" parent="." unique_id=524160328]
 script = ExtResource("3_sxr3c")
 metadata/_custom_type_script = "uid://dbndw8p05yam7"
+
+[node name="WallSegment" parent="Terrain3DObjects" unique_id=809691819 instance=ExtResource("4_qjys7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54550934, 0, -12.178679)
+
+[node name="WallSegment2" parent="Terrain3DObjects" unique_id=2021733776 instance=ExtResource("4_qjys7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5293045, 0, -12.178679)
+
+[node name="Fence" parent="Terrain3DObjects" unique_id=2034714734 instance=ExtResource("5_rfqfv")]
+transform = Transform3D(0.8221142, 0, 0.5693226, 0, 1, 0, -0.5693226, 0, 0.8221142, -7.1148705, 0, -3.83916)
+
+[node name="Building" parent="Terrain3DObjects" unique_id=1032823410 instance=ExtResource("6_j6ui3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.867999, 0, -23.039738)
+
+[node name="Rock" parent="Terrain3DObjects" unique_id=1509885845 instance=ExtResource("7_ifalb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.261713, 0, 1.6024418)
+
+[node name="BoulderCluster" parent="Terrain3DObjects" unique_id=2129215066 instance=ExtResource("8_usp30")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.101799, 0, 2.4627094)
+
+[node name="Barrel" parent="Terrain3DObjects" unique_id=402087858 instance=ExtResource("9_w3jct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.099485, 0, -3.2576838)
+
+[node name="Barrel2" parent="Terrain3DObjects" unique_id=444419963 instance=ExtResource("9_w3jct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.100504, 0, -12.492236)
+
+[node name="Tree" parent="Terrain3DObjects" unique_id=1860366873 instance=ExtResource("4_j1yq2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.1446, 0, -10.014116)
+
+[node name="Tree2" parent="Terrain3DObjects" unique_id=2080704121 instance=ExtResource("4_j1yq2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.555096, 0, -12.83094)
+
+[node name="Tree3" parent="Terrain3DObjects" unique_id=1391209005 instance=ExtResource("4_j1yq2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.878006, 0, -7.511242)
 
 [node name="SelectionController" type="Node3D" parent="." unique_id=418577478 node_paths=PackedStringArray("camera_node")]
 script = ExtResource("4_sxr3c")
