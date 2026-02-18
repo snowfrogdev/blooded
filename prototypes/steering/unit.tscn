@@ -10,6 +10,8 @@
 [ext_resource type="Resource" uid="uid://dq1s0irvh1u52" path="res://prototypes/steering/stop_steering_behavior.tres" id="6_lt827"]
 [ext_resource type="Script" uid="uid://debd0jyq4vqjb" path="res://prototypes/steering/moveable_3d.gd" id="7_moveable"]
 [ext_resource type="Script" uid="uid://bv70v07o82yy1" path="res://prototypes/steering/steering_pipeline/constraint_3d.gd" id="8_46gd5"]
+[ext_resource type="Script" uid="uid://sqchohioaal8" path="res://prototypes/steering/steering_pipeline/decomposer_3d.gd" id="8_grkff"]
+[ext_resource type="Resource" uid="uid://br557a4cbtlud" path="res://prototypes/steering/pathfinding/pathfinding_decomposer.tres" id="9_cv31l"]
 [ext_resource type="Resource" uid="uid://ddk8oysvyj7e7" path="res://prototypes/steering/avoid_obstacle_constraint.tres" id="9_kqq7p"]
 [ext_resource type="Script" uid="uid://c1jodm7dt2gmf" path="res://prototypes/steering/debug/steering_debug_draw.gd" id="10_debug"]
 
@@ -61,6 +63,7 @@ metadata/_custom_type_script = "uid://bpqfugve7hvvx"
 [node name="SteeringPipeline" type="Node" parent="." unique_id=397245993 node_paths=PackedStringArray("kinematic")]
 script = ExtResource("3_b4fmm")
 targeters = Array[ExtResource("4_x85kt")]([ExtResource("4_uxfk2")])
+decomposers = Array[ExtResource("8_grkff")]([ExtResource("9_cv31l")])
 constraints = Array[ExtResource("8_46gd5")]([ExtResource("9_kqq7p")])
 actuator = ExtResource("5_lt827")
 kinematic = NodePath("../GroundedKinematic3D")

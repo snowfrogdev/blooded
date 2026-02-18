@@ -34,6 +34,7 @@ enabled=PackedStringArray("res://addons/formation_editor/plugin.cfg", "res://add
 [global_group]
 
 terrain=""
+pathfinding=""
 
 [input]
 

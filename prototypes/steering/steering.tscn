@@ -2,16 +2,19 @@
 
 [ext_resource type="PackedScene" uid="uid://dg4kxr8mv2qwp" path="res://prototypes/rts_camera/rts_camera.tscn" id="1_gwcnc"]
 [ext_resource type="Terrain3DAssets" uid="uid://cdh03jn10jbb4" path="res://prototypes/steering/terrain_3d_assets.tres" id="2_j8gha"]
+[ext_resource type="Script" uid="uid://niemttc3koad" path="res://prototypes/steering/pathfinding/pathfinder_3d.gd" id="3_ifalb"]
 [ext_resource type="Script" uid="uid://dbndw8p05yam7" path="res://addons/terrain_3d/utils/terrain_3d_objects.gd" id="3_sxr3c"]
 [ext_resource type="PackedScene" uid="uid://clindcm5q8604" path="res://prototypes/steering/obstacles/tree.tscn" id="4_j1yq2"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/wall_segment.tscn" id="4_qjys7"]
 [ext_resource type="Script" uid="uid://c4j7v7uyll2x6" path="res://prototypes/movement/selection_controller.gd" id="4_sxr3c"]
+[ext_resource type="Script" uid="uid://dswfwc68vgrh" path="res://prototypes/steering/pathfinding/path_cost_calculator.gd" id="4_usp30"]
 [ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="5_gwcnc"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/fence.tscn" id="5_rfqfv"]
+[ext_resource type="Resource" uid="uid://cgnij8ntvxidc" path="res://prototypes/steering/pathfinding/obstacle_path_cost_calculator.tres" id="5_w3jct"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/building.tscn" id="6_j6ui3"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/rock.tscn" id="7_ifalb"]
 [ext_resource type="PackedScene" uid="uid://ncbp41630b43" path="res://prototypes/steering/obstacles/boulder_cluster.tscn" id="8_usp30"]
-[ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/barrel.tscn" id="9_w3jct"]
+[ext_resource type="PackedScene" uid="uid://d2r8lrm8t58y3" path="res://prototypes/steering/obstacles/barrel.tscn" id="9_w3jct"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
 sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
@@ -91,6 +94,11 @@ material = SubResource("Terrain3DMaterial_sxr3c")
 assets = ExtResource("2_j8gha")
 top_level = true
 metadata/_edit_lock_ = true
+
+[node name="Pathfinder3D" type="Node3D" parent="." unique_id=729155240 groups=["pathfinding"]]
+script = ExtResource("3_ifalb")
+cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct")])
+debug_enabled = true
 
 [node name="Terrain3DObjects" type="Node3D" parent="." unique_id=524160328]
 script = ExtResource("3_sxr3c")

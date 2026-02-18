@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PathfindingDecomposer" format=3 uid="uid://br557a4cbtlud"]
+
+[ext_resource type="Script" uid="uid://bygljyn15bhfe" path="res://prototypes/steering/pathfinding/pathfinding_decomposer.gd" id="1_5li70"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_5li70")
+metadata/_custom_type_script = "uid://bygljyn15bhfe"

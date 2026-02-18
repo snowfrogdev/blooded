@@ -6,6 +6,7 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var draw_whisker_rays: bool = true
 @export var draw_sub_goals: bool = true
 @export var draw_avoidance_zones: bool = true
+@export var draw_pathfinding_path: bool = true
 
 @export_group("Colors")
 @export var ray_hit_color: Color = Color.RED
@@ -14,6 +15,8 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var rejected_goal_color: Color = Color(1, 1, 1, 0.3)
 @export var avoidance_zone_color: Color = Color(1, 0.5, 0, 0.5)
 @export var shape_outline_color: Color = Color(1, 1, 1, 0.2)
+@export var path_color: Color = Color(0.2, 0.6, 1.0, 0.8)
+@export var waypoint_color: Color = Color.YELLOW
 
 var _im: ImmediateMesh
 var _material: StandardMaterial3D
@@ -58,6 +61,10 @@ func _process(_delta: float) -> void:
 				has_vertices = true
 			if draw_avoidance_zones and constraint.debug_violated:
 				has_vertices = true
+	if draw_pathfinding_path:
+		for decomposer in _pipeline.decomposers:
+			if decomposer is PathfindingDecomposer and not decomposer.debug_path.is_empty():
+				has_vertices = true
 
 	if not has_vertices:
 		return
@@ -72,6 +79,10 @@ func _process(_delta: float) -> void:
 				_draw_sub_goals(constraint)
 			if draw_avoidance_zones:
 				_draw_avoidance_zone(constraint)
+	if draw_pathfinding_path:
+		for decomposer in _pipeline.decomposers:
+			if decomposer is PathfindingDecomposer:
+				_draw_pathfinding_path(decomposer)
 
 	_im.surface_end()
 
@@ -106,6 +117,15 @@ func _draw_avoidance_zone(constraint: AvoidObstacleConstraint) -> void:
 	var avoidance_radius := constraint.debug_half_width + constraint.margin
 	_draw_circle_xz(constraint.debug_obstacle_center, avoidance_radius, avoidance_zone_color)
 	_draw_circle_xz(constraint.debug_obstacle_center, constraint.debug_half_width, shape_outline_color)
+
+
+func _draw_pathfinding_path(decomposer: PathfindingDecomposer) -> void:
+	if decomposer.debug_path.is_empty():
+		return
+	for i in decomposer.debug_path.size() - 1:
+		_draw_line(decomposer.debug_path[i], decomposer.debug_path[i + 1], path_color)
+	if decomposer.debug_waypoint_index < decomposer.debug_path.size():
+		_draw_cross(decomposer.debug_path[decomposer.debug_waypoint_index], 0.5, waypoint_color)
 
 
 # --- Drawing helpers ---

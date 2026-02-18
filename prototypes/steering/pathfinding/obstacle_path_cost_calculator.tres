@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ObstaclePathCostCalculator" format=3 uid="uid://cgnij8ntvxidc"]
+
+[ext_resource type="Script" uid="uid://daj5j5ty2slo1" path="res://prototypes/steering/pathfinding/obstacle_path_cost_calculator.gd" id="1_0fl2v"]
+
+[resource]
+script = ExtResource("1_0fl2v")
+metadata/_custom_type_script = "uid://daj5j5ty2slo1"

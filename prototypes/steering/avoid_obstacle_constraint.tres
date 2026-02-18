@@ -6,5 +6,4 @@
 script = ExtResource("1_mdr1o")
 margin = 1.0
 agent_radius = 0.31
-debug_enabled = true
 metadata/_custom_type_script = "uid://bv70v07o82yy1"
