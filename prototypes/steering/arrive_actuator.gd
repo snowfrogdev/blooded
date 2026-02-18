@@ -7,13 +7,13 @@ extends Actuator3D
 @export var target_radius: float = 0.3
 @export var time_to_target: float = 0.15
 
-func get_steering_path(agent: Node3D, kinematic: Kinematic3D, goal: Goal3D) -> SteeringPath3D:
+func get_steering_path(_agent: Node3D, _kinematic: Kinematic3D, goal: Goal3D) -> SteeringPath3D:
 	var path := SteeringPath3D.new()
 	if goal.has_position:
 		path.points.append(goal.position)
 	return path
 
-func compute_steering(agent: Node3D, kinematic: Kinematic3D, path: SteeringPath3D, goal: Goal3D) -> SteeringOutput3D:
+func compute_steering(agent: Node3D, kinematic: Kinematic3D, _path: SteeringPath3D, goal: Goal3D) -> SteeringOutput3D:
 	if not goal.has_position:
 		return null
 

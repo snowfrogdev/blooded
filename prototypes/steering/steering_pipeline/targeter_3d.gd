@@ -1,4 +1,4 @@
-class_name Targeter3D
+@abstract class_name Targeter3D
 extends Resource
 ## Generates top-level goals for steering by specifying target channels.
 ##
@@ -11,7 +11,4 @@ extends Resource
 ## Unlike "away from" behaviors (obstacle avoidance), Targeters always specify where
 ## to go, not what to avoid. Avoidance logic belongs in the constraints stage.
 
-
-func get_goal(agent: Node3D) -> Goal3D:
-	push_error("Targeter3D.get_goal() must be overridden")
-	return null
+@abstract func get_goal(agent: Node3D) -> Goal3D

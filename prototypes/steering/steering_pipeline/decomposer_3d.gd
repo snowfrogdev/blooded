@@ -1,4 +1,4 @@
-class_name Decomposer3D
+@abstract class_name Decomposer3D
 extends Resource
 ## Splits a goal into a more achievable sub-goal.
 ##
@@ -11,6 +11,4 @@ extends Resource
 ## sub-goal in more detail. Each decomposer only sees the sub-goal from the previous
 ## stage, not the original target, allowing efficient multi-resolution planning.
 
-func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
-	push_error("Decomposer3D.decompose() must be overridden")
-	return goal
+@abstract func decompose(agent: Node3D, goal: Goal3D) -> Goal3D
