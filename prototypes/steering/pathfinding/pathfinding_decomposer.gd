@@ -1,7 +1,8 @@
 class_name PathfindingDecomposer
 extends Decomposer3D
 ## Decomposes distant movement goals into nearby waypoints by querying the [Pathfinder3D] service
-## for an AStar3D path. Caches the path and advances through waypoints as the agent progresses.
+## for an AStar3D path, then smooths the result via line-of-sight checks.
+## Caches the path and advances through waypoints as the agent progresses.
 
 ## Distance at which the agent advances to the next waypoint.
 @export var waypoint_advance_radius: float = 1.5
@@ -9,6 +10,7 @@ extends Decomposer3D
 @export var path_replan_threshold: float = 3.0
 ## Re-query the path when the agent drifts farther than this from its current waypoint.
 @export var agent_drift_threshold: float = 5.0
+@export_flags_3d_physics var obstacle_mask: int = 4
 
 var _service: Pathfinder3D
 var _service_checked: bool = false
@@ -72,10 +74,40 @@ func _needs_replan(agent: Node3D, goal: Goal3D) -> bool:
 
 func _replan(agent: Node3D, goal: Goal3D) -> void:
 	_cached_path = _service.find_path(agent.global_position, goal.position)
+	if _cached_path.size() > 2:
+		_cached_path = _smooth_path(agent, _cached_path)
 	_cached_goal_pos = goal.position
 	_path_index = 1 # Skip index 0 (agent's start cell)
 	# Clamp in case path has 0 or 1 points
 	_path_index = mini(_path_index, maxi(_cached_path.size() - 1, 0))
+
+func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array:
+	var space_state := agent.get_world_3d().direct_space_state
+	var result := PackedVector3Array()
+	result.append(path[0])
+	var current := 0
+	while current < path.size() - 1:
+		var farthest := current + 1
+		for i in range(current + 2, path.size()):
+			if _has_line_of_sight(path[current], path[i], space_state):
+				farthest = i
+		result.append(path[farthest])
+		current = farthest
+	return result
+
+func _has_line_of_sight(
+	from_pos: Vector3, 
+	to_pos: Vector3, 
+	space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var query := PhysicsRayQueryParameters3D.new()
+	query.from = from_pos + Vector3(0, 0.5, 0)
+	query.to = to_pos + Vector3(0, 0.5, 0)
+	query.collision_mask = obstacle_mask
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	return space_state.intersect_ray(query).is_empty()
+
 
 func _advance_waypoint(agent: Node3D) -> void:
 	while _path_index < _cached_path.size() - 1:

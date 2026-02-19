@@ -17,7 +17,7 @@ func get_cost_multiplier(_from_position: Vector3, _to_position: Vector3) -> floa
 ## Called once per cell during grid construction. Return [code]true[/code] if the cell is
 ## passable, [code]false[/code] to disable it. The service passes the physics [param space_state]
 ## so calculators don't need to cache it.
-func check_passability(_pos: Vector3, _space_state: PhysicsDirectSpaceState3D) -> bool:
+func check_passability(_pos: Vector3, _cell_half_size: float,_space_state: PhysicsDirectSpaceState3D) -> bool:
 	return true
 
 ## Called once during grid setup to give calculator scene tree access.
