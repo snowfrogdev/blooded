@@ -17,6 +17,7 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var shape_outline_color: Color = Color(1, 1, 1, 0.2)
 @export var path_color: Color = Color(0.2, 0.6, 1.0, 0.8)
 @export var waypoint_color: Color = Color.YELLOW
+@export var path_half_width: float = 0.06
 
 var _im: ImmediateMesh
 var _material: StandardMaterial3D
@@ -52,39 +53,40 @@ func _process(_delta: float) -> void:
 
 	_im.clear_surfaces()
 
-	var has_vertices := false
+	var has_constraint_lines := false
 	for constraint in _pipeline.constraints:
 		if constraint is AvoidObstacleConstraint and constraint.debug_enabled:
 			if draw_whisker_rays and not constraint.debug_rays.is_empty():
-				has_vertices = true
+				has_constraint_lines = true
 			if draw_sub_goals and constraint.debug_violated:
-				has_vertices = true
+				has_constraint_lines = true
 			if draw_avoidance_zones and constraint.debug_violated:
-				has_vertices = true
+				has_constraint_lines = true
+
+	if has_constraint_lines:
+		_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
+		for constraint in _pipeline.constraints:
+			if constraint is AvoidObstacleConstraint and constraint.debug_enabled:
+				if draw_whisker_rays:
+					_draw_whisker_rays(constraint)
+				if draw_sub_goals:
+					_draw_sub_goals(constraint)
+				if draw_avoidance_zones:
+					_draw_avoidance_zone(constraint)
+		_im.surface_end()
+
 	if draw_pathfinding_path:
+		var has_path := false
 		for decomposer in _pipeline.decomposers:
 			if decomposer is PathfindingDecomposer and not decomposer.debug_path.is_empty():
-				has_vertices = true
-
-	if not has_vertices:
-		return
-
-	_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
-
-	for constraint in _pipeline.constraints:
-		if constraint is AvoidObstacleConstraint and constraint.debug_enabled:
-			if draw_whisker_rays:
-				_draw_whisker_rays(constraint)
-			if draw_sub_goals:
-				_draw_sub_goals(constraint)
-			if draw_avoidance_zones:
-				_draw_avoidance_zone(constraint)
-	if draw_pathfinding_path:
-		for decomposer in _pipeline.decomposers:
-			if decomposer is PathfindingDecomposer:
-				_draw_pathfinding_path(decomposer)
-
-	_im.surface_end()
+				has_path = true
+				break
+		if has_path:
+			_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _material)
+			for decomposer in _pipeline.decomposers:
+				if decomposer is PathfindingDecomposer:
+					_draw_pathfinding_path(decomposer)
+			_im.surface_end()
 
 
 func _draw_whisker_rays(constraint: AvoidObstacleConstraint) -> void:
@@ -122,10 +124,14 @@ func _draw_avoidance_zone(constraint: AvoidObstacleConstraint) -> void:
 func _draw_pathfinding_path(decomposer: PathfindingDecomposer) -> void:
 	if decomposer.debug_path.is_empty():
 		return
+	_im.surface_set_color(path_color)
 	for i in decomposer.debug_path.size() - 1:
-		_draw_line(decomposer.debug_path[i], decomposer.debug_path[i + 1], path_color)
+		_draw_thick_line(decomposer.debug_path[i], decomposer.debug_path[i + 1], path_half_width)
 	if decomposer.debug_waypoint_index < decomposer.debug_path.size():
-		_draw_cross(decomposer.debug_path[decomposer.debug_waypoint_index], 0.5, waypoint_color)
+		var wp := decomposer.debug_path[decomposer.debug_waypoint_index]
+		_im.surface_set_color(waypoint_color)
+		_draw_thick_line(wp - Vector3(0.3, 0, 0), wp + Vector3(0.3, 0, 0), path_half_width)
+		_draw_thick_line(wp - Vector3(0, 0, 0.3), wp + Vector3(0, 0, 0.3), path_half_width)
 
 
 # --- Drawing helpers ---
@@ -142,6 +148,17 @@ func _draw_cross(center: Vector3, size: float, color: Color) -> void:
 	_draw_line(center - Vector3(half, 0, 0), center + Vector3(half, 0, 0), color)
 	_draw_line(center - Vector3(0, half, 0), center + Vector3(0, half, 0), color)
 	_draw_line(center - Vector3(0, 0, half), center + Vector3(0, 0, half), color)
+
+
+func _draw_thick_line(from: Vector3, to: Vector3, half_width: float) -> void:
+	var dir := (to - from).normalized()
+	var perp := Vector3(-dir.z, 0, dir.x) * half_width
+	_im.surface_add_vertex(from - perp)
+	_im.surface_add_vertex(to - perp)
+	_im.surface_add_vertex(to + perp)
+	_im.surface_add_vertex(from - perp)
+	_im.surface_add_vertex(to + perp)
+	_im.surface_add_vertex(from + perp)
 
 
 func _draw_circle_xz(center: Vector3, radius: float, color: Color, segments: int = 24) -> void:
