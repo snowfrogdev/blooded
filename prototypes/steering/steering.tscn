@@ -98,6 +98,7 @@ metadata/_custom_type_script = "uid://c4j7v7uyll2x6"
 data_directory = "res://prototypes/steering/terrain_data"
 material = SubResource("Terrain3DMaterial_sxr3c")
 assets = ExtResource("2_j8gha")
+collision_mode = 3
 top_level = true
 metadata/_edit_lock_ = true
 

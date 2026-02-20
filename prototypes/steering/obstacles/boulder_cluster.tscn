@@ -12,8 +12,9 @@ height = 1.6
 radius = 0.9
 height = 1.8
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_cluster"]
-size = Vector3(3.2442017, 1.2, 2.9942017)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_mqdks"]
+height = 1.2429199
+radius = 1.6455078
 
 [node name="BoulderCluster" type="StaticBody3D" unique_id=1661894616]
 collision_layer = 4
@@ -32,5 +33,5 @@ transform = Transform3D(1, 0, 0, 0, 0.55, 0, 0, 0, 1, -0.5, 0.495, 0.8)
 mesh = SubResource("SphereMesh_b3")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2133210663]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20321655, 0.6, 0.2578186)
-shape = SubResource("BoxShape3D_cluster")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15630913, 0.5940186, 0.41417578)
+shape = SubResource("CylinderShape3D_mqdks")
