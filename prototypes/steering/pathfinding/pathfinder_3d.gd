@@ -196,6 +196,11 @@ func _setup_debug() -> void:
 	_debug_mesh_instance.material_override = mat
 	add_child(_debug_mesh_instance)
 
+func _corner_pos(center: Vector3, dx: float, dz: float, y_offset: Vector3) -> Vector3:
+	var pos := Vector3(center.x + dx, 0.0, center.z + dz)
+	pos.y = height_provider.get_height(pos) if height_provider else center.y
+	return pos + y_offset
+
 func _draw_debug_grid() -> void:
 	_debug_im.clear_surfaces()
 	if _leaves.is_empty():
@@ -211,12 +216,11 @@ func _draw_debug_grid() -> void:
 	_draw_blocked_leaves(_root, y_offset, blocked_color, blocked_outline_color, line_hw)
 	_debug_im.surface_set_color(color)
 	for leaf in _leaves:
-		var pos := leaf.center + y_offset
 		var h := leaf.half_size
-		var a := pos + Vector3(-h, 0, -h)
-		var b := pos + Vector3(h, 0, -h)
-		var c := pos + Vector3(h, 0, h)
-		var d := pos + Vector3(-h, 0, h)
+		var a := _corner_pos(leaf.center, -h, -h, y_offset)
+		var b := _corner_pos(leaf.center,  h, -h, y_offset)
+		var c := _corner_pos(leaf.center,  h,  h, y_offset)
+		var d := _corner_pos(leaf.center, -h,  h, y_offset)
 		_draw_line_quad(a, b, line_hw)
 		_draw_line_quad(b, c, line_hw)
 		_draw_line_quad(c, d, line_hw)
@@ -236,12 +240,11 @@ func _draw_line_quad(from: Vector3, to: Vector3, half_width: float) -> void:
 func _draw_blocked_leaves(cell: QuadTree.Cell, y_offset: Vector3, color: Color, outline_color: Color, line_hw: float) -> void:
 	if cell.is_leaf():
 		if cell.is_blocked:
-			var pos := cell.center + y_offset
 			var h := cell.half_size
-			var a := pos + Vector3(-h, 0, -h)
-			var b := pos + Vector3(h, 0, -h)
-			var c := pos + Vector3(h, 0, h)
-			var d := pos + Vector3(-h, 0, h)
+			var a := _corner_pos(cell.center, -h, -h, y_offset)
+			var b := _corner_pos(cell.center,  h, -h, y_offset)
+			var c := _corner_pos(cell.center,  h,  h, y_offset)
+			var d := _corner_pos(cell.center, -h,  h, y_offset)
 			_debug_im.surface_set_color(color)
 			_debug_im.surface_add_vertex(a)
 			_debug_im.surface_add_vertex(b)

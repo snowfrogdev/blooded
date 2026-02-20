@@ -33,6 +33,7 @@ extends Decomposer3D
 
 var _service: Pathfinder3D
 var _service_checked: bool = false
+var _height_provider: HeightProvider
 var _cached_path: PackedVector3Array
 var _cached_goal_pos: Vector3
 var _snapped_goal: Vector3 ## Actual reachable endpoint (may differ from goal if target is in a blocked cell).
@@ -94,6 +95,8 @@ func _ensure_service(agent: Node3D) -> bool:
 		_service = node as Pathfinder3D
 		if not _service:
 			push_warning("PathfindingDecomposer: node in 'pathfinding' group is not a Pathfinder3D")
+		else:
+			_height_provider = _service.height_provider
 	else:
 		push_warning("PathfindingDecomposer: no node found in 'pathfinding' group; passing goals through unchanged")
 	_service_checked = true
@@ -221,29 +224,49 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 		current = farthest
 	return result
 
+## Maximum XZ distance between successive terrain-height samples during LOS checks.
+## Smaller = more accurate on steep terrain but more raycasts per smoothing pass.
+const LOS_STEP_SIZE: float = 1.0
+
 func _has_line_of_sight(
 	from_pos: Vector3,
 	to_pos: Vector3,
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
 	var lift := Vector3(0, 0.5, 0)
-	var f := from_pos + lift
-	var t := to_pos + lift
 
-	# Center ray.
-	if not _cast_los_ray(f, t, space_state):
-		return false
-
-	# Flanking rays offset by agent_radius perpendicular to the segment.
+	# Flanking offsets: center ray always, plus left/right if agent has width.
+	var offsets: Array[Vector3] = [Vector3.ZERO]
 	var dir := to_pos - from_pos
 	if dir.length_squared() > 0.001 and agent_radius > 0.0:
 		var right := dir.normalized().cross(Vector3.UP) * agent_radius
-		if not _cast_los_ray(f - right, t - right, space_state):
-			return false
-		if not _cast_los_ray(f + right, t + right, space_state):
-			return false
+		offsets.append(-right)
+		offsets.append(right)
+
+	# Subdivide the segment into terrain-following hops.
+	var xz_dist := Vector2(dir.x, dir.z).length()
+	var steps := maxi(1, ceili(xz_dist / LOS_STEP_SIZE))
+	var inv_steps := 1.0 / steps
+
+	for offset in offsets:
+		var prev := _terrain_lifted_point(from_pos + offset, lift)
+		for i in range(1, steps + 1):
+			var t := i * inv_steps
+			var sample_xz := from_pos.lerp(to_pos, t) + offset
+			var curr := _terrain_lifted_point(sample_xz, lift)
+			if not _cast_los_ray(prev, curr, space_state):
+				return false
+			prev = curr
 
 	return true
+
+
+## Returns [param pos] repositioned to terrain height at its XZ, then lifted.
+## Falls back to using the position's existing Y if no height provider is available.
+func _terrain_lifted_point(pos: Vector3, lift: Vector3) -> Vector3:
+	if _height_provider:
+		return Vector3(pos.x, _height_provider.get_height(pos), pos.z) + lift
+	return pos + lift
 
 
 func _cast_los_ray(from: Vector3, to: Vector3, space_state: PhysicsDirectSpaceState3D) -> bool:

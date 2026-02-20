@@ -30,13 +30,13 @@ func setup(context: Node) -> void:
 	while half >= min_half:
 		var box := BoxShape3D.new()
 		var side := half * 2.0 + inflation * 2.0
-		box.size = Vector3(side, 1.0, side)
+		box.size = Vector3(side, 100.0, side)
 		_shapes_by_half_size[half] = box
 		half *= 0.5
 
 
 func check_passability(
-	pos: Vector3, 
+	pos: Vector3,
 	cell_half_size: float,
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
@@ -45,11 +45,11 @@ func check_passability(
 		# Fallback: create on-the-fly for unexpected sizes
 		shape = BoxShape3D.new()
 		var side := cell_half_size * 2.0 + inflation * 2.0
-		shape.size = Vector3(side, 1.0, side)
+		shape.size = Vector3(side, 100.0, side)
 		_shapes_by_half_size[cell_half_size] = shape
 	var params := PhysicsShapeQueryParameters3D.new()
 	params.shape = shape
-	params.transform = Transform3D(Basis.IDENTITY, Vector3(pos.x, pos.y + 0.5, pos.z))
+	params.transform = Transform3D(Basis.IDENTITY, Vector3(pos.x, pos.y, pos.z))
 	params.collision_mask = obstacle_mask
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
