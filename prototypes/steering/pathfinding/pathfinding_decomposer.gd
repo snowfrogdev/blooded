@@ -14,6 +14,22 @@ extends Decomposer3D
 ## Re-query the path when the agent drifts farther than this from the cached path.
 @export var agent_drift_threshold: float = 5.0
 @export_flags_3d_physics var obstacle_mask: int = 4
+## Half-width of the unit body. The line-of-sight check for path smoothing casts
+## flanking rays offset by this amount, ensuring smoothed paths maintain clearance.
+@export var agent_radius: float = 0.31
+
+@export_group("Adaptive Lookahead")
+## Turn angle (radians) at a waypoint that is considered sharp enough to trigger
+## lookahead reduction. Turns sharper than this make the decomposer place the
+## sub-goal closer, inducing earlier deceleration via the actuator's arrive ramp.
+@export var sharp_turn_threshold: float = PI / 4.0
+## Minimum fraction of the base lookahead distance. Prevents the lookahead from
+## collapsing too close to the agent even at very sharp turns.
+@export_range(0.1, 1.0) var min_lookahead_factor: float = 0.3
+## Minimum Euclidean distance from agent to the decomposed goal. At sharp
+## corners, path-distance and straight-line distance diverge; if the adaptive
+## lookahead collapses the target closer than this, the base lookahead is used.
+@export var min_goal_distance: float = 0.5
 
 var _service: Pathfinder3D
 var _service_checked: bool = false
@@ -48,7 +64,14 @@ func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
 			return goal
 		_update_projection(agent.global_position)
 
-	var target_point := _get_lookahead_point(_lookahead_distance)
+	var effective_lookahead := _get_adaptive_lookahead()
+	var target_point := _get_lookahead_point(effective_lookahead)
+
+	# Euclidean distance floor: at sharp corners, path-distance and straight-line
+	# distance diverge. If the adaptive lookahead collapsed the target too close,
+	# extend to the full base lookahead so the actuator doesn't treat it as arrived.
+	if agent.global_position.distance_to(target_point) < min_goal_distance:
+		target_point = _get_lookahead_point(_lookahead_distance)
 
 	var new_goal := Goal3D.new()
 	new_goal.merge_from(goal)
@@ -95,12 +118,10 @@ func _needs_replan(_agent: Node3D, goal: Goal3D) -> bool:
 
 func _replan(agent: Node3D, goal: Goal3D) -> void:
 	_cached_path = _service.find_path(agent.global_position, goal.position)
-	if _cached_path.size() > 2:
-		_cached_path = _smooth_path(agent, _cached_path)
-	_cached_goal_pos = goal.position
-	# Record the actual reachable endpoint. Use the precise click position when the target
-	# is in a free cell; use the nearest free cell center when the target is blocked.
+	# Replace both endpoints with actual positions BEFORE smoothing,
+	# so LOS checks verify against real start/end, not cell centers.
 	if _cached_path.size() >= 2:
+		_cached_path[0] = agent.global_position
 		if _service.is_position_free(goal.position):
 			_snapped_goal = goal.position
 		else:
@@ -109,10 +130,12 @@ func _replan(agent: Node3D, goal: Goal3D) -> void:
 			var moveable := agent.get_node_or_null("Moveable3D") as Moveable3D
 			if moveable:
 				moveable.target_position = _snapped_goal
-		# Replace endpoint with actual target so projection follows the real path.
 		_cached_path[_cached_path.size() - 1] = _snapped_goal
 	else:
 		_snapped_goal = goal.position
+	if _cached_path.size() > 2:
+		_cached_path = _smooth_path(agent, _cached_path)
+	_cached_goal_pos = goal.position
 
 ## Projects [param pos] onto [member _cached_path] and stores the result in
 ## [member _proj_seg] / [member _proj_t]. Returns distance from pos to the path.
@@ -152,6 +175,37 @@ func _get_lookahead_point(distance: float) -> Vector3:
 		distance -= seg_len
 	return _cached_path[_cached_path.size() - 1]
 
+## Returns a lookahead distance reduced when a sharp turn is detected ahead on
+## the path. Placing the sub-goal closer triggers the actuator's arrive
+## deceleration before the corner.
+func _get_adaptive_lookahead() -> float:
+	var base := _lookahead_distance
+	for i in range(_proj_seg + 1, _cached_path.size() - 1):
+		var dist := _distance_along_path_to(i)
+		if dist > base * 2.0:
+			break
+		var dir_in := (_cached_path[i] - _cached_path[i - 1]).normalized()
+		var dir_out := (_cached_path[i + 1] - _cached_path[i]).normalized()
+		var dot := clampf(dir_in.dot(dir_out), -1.0, 1.0)
+		var turn_angle := acos(dot)
+		if turn_angle > sharp_turn_threshold:
+			var proximity := clampf(dist / base, min_lookahead_factor, 1.0)
+			return base * proximity
+	return base
+
+
+## Returns the distance along the path from the current projection to waypoint [param idx].
+func _distance_along_path_to(idx: int) -> float:
+	# Remaining distance on the current projected segment.
+	var a := _cached_path[_proj_seg]
+	var b := _cached_path[_proj_seg + 1]
+	var dist := a.distance_to(b) * (1.0 - _proj_t)
+	# Sum full segments between projection segment end and the target waypoint.
+	for i in range(_proj_seg + 1, idx):
+		dist += _cached_path[i].distance_to(_cached_path[i + 1])
+	return dist
+
+
 func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array:
 	var space_state := agent.get_world_3d().direct_space_state
 	var result := PackedVector3Array()
@@ -171,9 +225,30 @@ func _has_line_of_sight(
 	to_pos: Vector3,
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
+	var lift := Vector3(0, 0.5, 0)
+	var f := from_pos + lift
+	var t := to_pos + lift
+
+	# Center ray.
+	if not _cast_los_ray(f, t, space_state):
+		return false
+
+	# Flanking rays offset by agent_radius perpendicular to the segment.
+	var dir := to_pos - from_pos
+	if dir.length_squared() > 0.001 and agent_radius > 0.0:
+		var right := dir.normalized().cross(Vector3.UP) * agent_radius
+		if not _cast_los_ray(f - right, t - right, space_state):
+			return false
+		if not _cast_los_ray(f + right, t + right, space_state):
+			return false
+
+	return true
+
+
+func _cast_los_ray(from: Vector3, to: Vector3, space_state: PhysicsDirectSpaceState3D) -> bool:
 	var query := PhysicsRayQueryParameters3D.new()
-	query.from = from_pos + Vector3(0, 0.5, 0)
-	query.to = to_pos + Vector3(0, 0.5, 0)
+	query.from = from
+	query.to = to
 	query.collision_mask = obstacle_mask
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
