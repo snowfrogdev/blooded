@@ -51,6 +51,7 @@ func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
 		return goal
 	_ensure_lookahead(agent)
 	if not goal.has_position:
+		_cached_path = PackedVector3Array()
 		return goal
 	if _needs_replan(agent, goal):
 		_replan(agent, goal)
