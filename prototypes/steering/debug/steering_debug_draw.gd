@@ -7,6 +7,10 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var draw_sub_goals: bool = true
 @export var draw_avoidance_zones: bool = true
 @export var draw_pathfinding_path: bool = true
+## When true, path segments are colored by turn sharpness at each waypoint
+## (green = straight / full speed, red = sharp turn / slow). When false, uses
+## the uniform [member path_color].
+@export var color_path_by_turn_sharpness: bool = true
 @export var draw_target: bool = true
 
 @export_group("Colors")
@@ -134,13 +138,30 @@ func _draw_avoidance_zone(constraint: AvoidObstacleConstraint) -> void:
 func _draw_pathfinding_path(decomposer: PathfindingDecomposer) -> void:
 	if decomposer.debug_path.is_empty():
 		return
-	_im.surface_set_color(path_color)
-	for i in decomposer.debug_path.size() - 1:
-		_draw_thick_line(decomposer.debug_path[i], decomposer.debug_path[i + 1], path_half_width)
+	var pts := decomposer.debug_path
+	for i in pts.size() - 1:
+		# Color the segment approaching a turn based on the turn sharpness at its
+		# end-waypoint (i+1). The last segment has no outgoing direction, so it
+		# falls back to the uniform path_color.
+		if color_path_by_turn_sharpness and i < pts.size() - 2:
+			_im.surface_set_color(_turn_color_at(pts, i + 1))
+		else:
+			_im.surface_set_color(path_color)
+		_draw_thick_line(pts[i], pts[i + 1], path_half_width)
 	var lp := decomposer.debug_lookahead_point
 	_im.surface_set_color(waypoint_color)
 	_draw_thick_line(lp - Vector3(0.3, 0, 0), lp + Vector3(0.3, 0, 0), path_half_width)
 	_draw_thick_line(lp - Vector3(0, 0, 0.3), lp + Vector3(0, 0, 0.3), path_half_width)
+
+
+## Returns a green-to-red color based on the turn angle at waypoint [param idx].
+func _turn_color_at(pts: PackedVector3Array, idx: int) -> Color:
+	var dir_in := (pts[idx] - pts[idx - 1]).normalized()
+	var dir_out := (pts[idx + 1] - pts[idx]).normalized()
+	var dot := clampf(dir_in.dot(dir_out), -1.0, 1.0)
+	# 0 = straight (green), 1 = U-turn (red).
+	var sharpness := 1.0 - (dot + 1.0) * 0.5
+	return Color(sharpness, 1.0 - sharpness, 0.0, 0.8)
 
 
 # --- Drawing helpers ---
