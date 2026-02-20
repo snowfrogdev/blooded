@@ -2,13 +2,16 @@ class_name PathfindingDecomposer
 extends Decomposer3D
 ## Decomposes distant movement goals into nearby waypoints by querying the [Pathfinder3D] service
 ## for an AStar3D path, then smooths the result via line-of-sight checks.
-## Caches the path and advances through waypoints as the agent progresses.
+## Uses continuous path projection (Reynolds-style) to produce a lookahead sub-goal that
+## smoothly curves around corners, rather than chasing discrete waypoints.
 
-## Distance at which the agent advances to the next waypoint.
-@export var waypoint_advance_radius: float = 1.5
+## Extra distance beyond the actuator's slow_radius for the lookahead sub-goal.
+## The effective lookahead is slow_radius + this margin, ensuring the agent
+## reaches full speed during path following and only decelerates at the endpoint.
+@export var lookahead_margin: float = 1.0
 ## Re-query the path when the goal moves farther than this from the cached goal.
 @export var path_replan_threshold: float = 3.0
-## Re-query the path when the agent drifts farther than this from its current waypoint.
+## Re-query the path when the agent drifts farther than this from the cached path.
 @export var agent_drift_threshold: float = 5.0
 @export_flags_3d_physics var obstacle_mask: int = 4
 
@@ -16,10 +19,13 @@ var _service: Pathfinder3D
 var _service_checked: bool = false
 var _cached_path: PackedVector3Array
 var _cached_goal_pos: Vector3
-var _path_index: int = 0
+var _snapped_goal: Vector3 ## Actual reachable endpoint (may differ from goal if target is in a blocked cell).
+var _proj_seg: int ## Segment index of latest projection.
+var _proj_t: float ## Parametric t on the projected segment.
+var _lookahead_distance: float ## Computed at startup: slow_radius + lookahead_margin.
 
 var debug_path: PackedVector3Array ## Current cached path, read by SteeringDebugDraw.
-var debug_waypoint_index: int ## Active waypoint index in the path.
+var debug_lookahead_point: Vector3 ## Lookahead target, read by SteeringDebugDraw.
 
 func _init() -> void:
 	resource_local_to_scene = true
@@ -27,23 +33,31 @@ func _init() -> void:
 func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
 	if not _ensure_service(agent):
 		return goal
+	_ensure_lookahead(agent)
 	if not goal.has_position:
 		return goal
 	if _needs_replan(agent, goal):
 		_replan(agent, goal)
 	if _cached_path.is_empty() or _cached_path.size() <= 1:
-		return goal # Direct line or no path found
-	_advance_waypoint(agent)
+		return goal
+
+	var path_dist := _update_projection(agent.global_position)
+	if path_dist > agent_drift_threshold:
+		_replan(agent, goal)
+		if _cached_path.is_empty() or _cached_path.size() <= 1:
+			return goal
+		_update_projection(agent.global_position)
+
+	var target_point := _get_lookahead_point(_lookahead_distance)
+
 	var new_goal := Goal3D.new()
 	new_goal.merge_from(goal)
 	new_goal.has_position = true
-	# Use actual goal position for the final waypoint to avoid ~1m grid snap error.l
-	if _path_index >= _cached_path.size() - 1:
-		new_goal.position = goal.position
-	else:
-		new_goal.position = _cached_path[_path_index]
-	debug_path = _cached_path
-	debug_waypoint_index = _path_index
+	new_goal.position = target_point
+
+	debug_path = _cached_path.duplicate()
+	debug_path[0] = agent.global_position
+	debug_lookahead_point = target_point
 	return new_goal
 
 func _ensure_service(agent: Node3D) -> bool:
@@ -61,14 +75,21 @@ func _ensure_service(agent: Node3D) -> bool:
 	_service_checked = true
 	return _service != null
 
-func _needs_replan(agent: Node3D, goal: Goal3D) -> bool:
+func _ensure_lookahead(agent: Node3D) -> void:
+	if _lookahead_distance > 0:
+		return
+	for child in agent.get_children():
+		if child is SteeringPipeline3D and child.actuator:
+			var slow_r = child.actuator.get("slow_radius")
+			if slow_r != null:
+				_lookahead_distance = slow_r + lookahead_margin
+				return
+	_lookahead_distance = lookahead_margin + 3.0 # Fallback
+
+func _needs_replan(_agent: Node3D, goal: Goal3D) -> bool:
 	if _cached_path.is_empty():
 		return true
 	if goal.position.distance_to(_cached_goal_pos) > path_replan_threshold:
-		return true
-	# Replan if agent has drifted too far from current waypoint (e.g. pushed by physics)
-	if _path_index < _cached_path.size() and \
-		agent.global_position.distance_to(_cached_path[_path_index]) > agent_drift_threshold:
 		return true
 	return false
 
@@ -77,9 +98,59 @@ func _replan(agent: Node3D, goal: Goal3D) -> void:
 	if _cached_path.size() > 2:
 		_cached_path = _smooth_path(agent, _cached_path)
 	_cached_goal_pos = goal.position
-	_path_index = 1 # Skip index 0 (agent's start cell)
-	# Clamp in case path has 0 or 1 points
-	_path_index = mini(_path_index, maxi(_cached_path.size() - 1, 0))
+	# Record the actual reachable endpoint. Use the precise click position when the target
+	# is in a free cell; use the nearest free cell center when the target is blocked.
+	if _cached_path.size() >= 2:
+		if _service.is_position_free(goal.position):
+			_snapped_goal = goal.position
+		else:
+			_snapped_goal = _cached_path[_cached_path.size() - 1]
+			# Target was in a blocked cell — update Moveable3D so arrival detection works.
+			var moveable := agent.get_node_or_null("Moveable3D") as Moveable3D
+			if moveable:
+				moveable.target_position = _snapped_goal
+		# Replace endpoint with actual target so projection follows the real path.
+		_cached_path[_cached_path.size() - 1] = _snapped_goal
+	else:
+		_snapped_goal = goal.position
+
+## Projects [param pos] onto [member _cached_path] and stores the result in
+## [member _proj_seg] / [member _proj_t]. Returns distance from pos to the path.
+func _update_projection(pos: Vector3) -> float:
+	var best_dist_sq := INF
+	for i in range(_cached_path.size() - 1):
+		var a := _cached_path[i]
+		var b := _cached_path[i + 1]
+		var ab := b - a
+		var ab_len_sq := ab.length_squared()
+		if ab_len_sq < 0.0001:
+			continue
+		var t := clampf((pos - a).dot(ab) / ab_len_sq, 0.0, 1.0)
+		var closest := a + ab * t
+		var dist_sq := pos.distance_squared_to(closest)
+		if dist_sq < best_dist_sq:
+			best_dist_sq = dist_sq
+			_proj_seg = i
+			_proj_t = t
+	return sqrt(best_dist_sq)
+
+## From the current projection, advances [param distance] along the path.
+## Returns the target point. When the lookahead overshoots the path endpoint,
+## returns the endpoint (which is _snapped_goal after _replan replaces it).
+func _get_lookahead_point(distance: float) -> Vector3:
+	var a := _cached_path[_proj_seg]
+	var b := _cached_path[_proj_seg + 1]
+	var seg_len := a.distance_to(b)
+	var remaining := seg_len * (1.0 - _proj_t)
+	if distance <= remaining and seg_len > 0.0001:
+		return a.lerp(b, _proj_t + distance / seg_len)
+	distance -= remaining
+	for i in range(_proj_seg + 1, _cached_path.size() - 1):
+		seg_len = _cached_path[i].distance_to(_cached_path[i + 1])
+		if distance <= seg_len and seg_len > 0.0001:
+			return _cached_path[i].lerp(_cached_path[i + 1], distance / seg_len)
+		distance -= seg_len
+	return _cached_path[_cached_path.size() - 1]
 
 func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array:
 	var space_state := agent.get_world_3d().direct_space_state
@@ -96,8 +167,8 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 	return result
 
 func _has_line_of_sight(
-	from_pos: Vector3, 
-	to_pos: Vector3, 
+	from_pos: Vector3,
+	to_pos: Vector3,
 	space_state: PhysicsDirectSpaceState3D
 ) -> bool:
 	var query := PhysicsRayQueryParameters3D.new()
@@ -107,11 +178,3 @@ func _has_line_of_sight(
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
 	return space_state.intersect_ray(query).is_empty()
-
-
-func _advance_waypoint(agent: Node3D) -> void:
-	while _path_index < _cached_path.size() - 1:
-		if agent.global_position.distance_to(_cached_path[_path_index]) < waypoint_advance_radius:
-			_path_index += 1
-		else:
-			break

@@ -114,6 +114,11 @@ func find_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 		return PackedVector3Array()
 	return _astar.get_point_path(from_id, to_id)
 
+## Returns true if [param pos] lands in a free (passable) leaf cell.
+func is_position_free(pos: Vector3) -> bool:
+	var leaf := QuadTree.find_leaf_at(_root, pos)
+	return leaf != null and leaf.astar_id >= 0
+
 ## Find the AStar ID of the free leaf containing [param pos].
 ## Uses quadtree containment first; falls back to nearest-point if the
 ## position is outside the grid or lands in a blocked cell.

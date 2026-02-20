@@ -7,6 +7,7 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var draw_sub_goals: bool = true
 @export var draw_avoidance_zones: bool = true
 @export var draw_pathfinding_path: bool = true
+@export var draw_target: bool = true
 
 @export_group("Colors")
 @export var ray_hit_color: Color = Color.RED
@@ -17,11 +18,13 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var shape_outline_color: Color = Color(1, 1, 1, 0.2)
 @export var path_color: Color = Color(0.2, 0.6, 1.0, 0.8)
 @export var waypoint_color: Color = Color.YELLOW
+@export var target_color: Color = Color(1, 0.3, 0.7, 0.9)
 @export var path_half_width: float = 0.06
 
 var _im: ImmediateMesh
 var _material: StandardMaterial3D
 var _pipeline: SteeringPipeline3D
+var _moveable: Moveable3D
 
 
 func _ready() -> void:
@@ -37,11 +40,12 @@ func _ready() -> void:
 	_material.no_depth_test = true
 	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
-	# Find sibling SteeringPipeline3D.
+	# Find sibling SteeringPipeline3D and Moveable3D.
 	for sibling in get_parent().get_children():
 		if sibling is SteeringPipeline3D:
 			_pipeline = sibling
-			break
+		elif sibling is Moveable3D:
+			_moveable = sibling
 
 	# Use global coordinates — set top_level so the mesh isn't offset by parent transform.
 	top_level = true
@@ -73,6 +77,12 @@ func _process(_delta: float) -> void:
 					_draw_sub_goals(constraint)
 				if draw_avoidance_zones:
 					_draw_avoidance_zone(constraint)
+		_im.surface_end()
+
+	if draw_target and _moveable and _moveable.has_target:
+		_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
+		var target_pos := _moveable.target_position + Vector3(0, 0.1, 0)
+		_draw_cross(target_pos, 0.5, target_color)
 		_im.surface_end()
 
 	if draw_pathfinding_path:
@@ -127,11 +137,10 @@ func _draw_pathfinding_path(decomposer: PathfindingDecomposer) -> void:
 	_im.surface_set_color(path_color)
 	for i in decomposer.debug_path.size() - 1:
 		_draw_thick_line(decomposer.debug_path[i], decomposer.debug_path[i + 1], path_half_width)
-	if decomposer.debug_waypoint_index < decomposer.debug_path.size():
-		var wp := decomposer.debug_path[decomposer.debug_waypoint_index]
-		_im.surface_set_color(waypoint_color)
-		_draw_thick_line(wp - Vector3(0.3, 0, 0), wp + Vector3(0.3, 0, 0), path_half_width)
-		_draw_thick_line(wp - Vector3(0, 0, 0.3), wp + Vector3(0, 0, 0.3), path_half_width)
+	var lp := decomposer.debug_lookahead_point
+	_im.surface_set_color(waypoint_color)
+	_draw_thick_line(lp - Vector3(0.3, 0, 0), lp + Vector3(0.3, 0, 0), path_half_width)
+	_draw_thick_line(lp - Vector3(0, 0, 0.3), lp + Vector3(0, 0, 0.3), path_half_width)
 
 
 # --- Drawing helpers ---

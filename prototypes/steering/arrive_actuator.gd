@@ -24,9 +24,11 @@ func compute_steering(agent: Node3D, kinematic: Kinematic3D, _path: SteeringPath
 	if distance < target_radius:
 		return null
 
-	var target_speed = max_speed
+	var target_speed: float
 	if distance <= slow_radius:
 		target_speed = max_speed * distance / slow_radius
+	else:
+		target_speed = max_speed
 
 	var target_velocity = direction.normalized() * target_speed
 
