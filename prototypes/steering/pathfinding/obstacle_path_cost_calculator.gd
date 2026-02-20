@@ -9,6 +9,10 @@ extends PathCostCalculator
 
 ## Physics collision mask for obstacle detection (default: layer 3).
 @export_flags_3d_physics var obstacle_mask: int = 4
+## Additional clearance buffer (meters) added to each side of the cell's overlap box.
+## Cells within this distance of an obstacle are marked blocked, ensuring paths
+## maintain minimum clearance at the grid level. Set to 0.0 to disable (default).
+@export var inflation: float = 0.0
 
 var _shapes_by_half_size: Dictionary = {} # float -> BoxShape3D
 
@@ -25,7 +29,8 @@ func setup(context: Node) -> void:
 	var half := root_size * 0.5
 	while half >= min_half:
 		var box := BoxShape3D.new()
-		box.size = Vector3(half * 2.0, 1.0, half * 2.0)
+		var side := half * 2.0 + inflation * 2.0
+		box.size = Vector3(side, 1.0, side)
 		_shapes_by_half_size[half] = box
 		half *= 0.5
 
@@ -39,7 +44,8 @@ func check_passability(
 	if not shape:
 		# Fallback: create on-the-fly for unexpected sizes
 		shape = BoxShape3D.new()
-		shape.size = Vector3(cell_half_size * 2.0, 1.0, cell_half_size * 2.0)
+		var side := cell_half_size * 2.0 + inflation * 2.0
+		shape.size = Vector3(side, 1.0, side)
 		_shapes_by_half_size[cell_half_size] = shape
 	var params := PhysicsShapeQueryParameters3D.new()
 	params.shape = shape

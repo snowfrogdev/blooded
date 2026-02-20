@@ -82,9 +82,13 @@ func _build_grid() -> void:
 	for leaf in _leaves:
 		for dir in QuadTree.Direction.values():
 			for neighbor in QuadTree.find_neighbors(leaf, dir):
-				if neighbor.astar_id >= 0 and \
-				not _astar.are_points_connected(leaf.astar_id, neighbor.astar_id):
-					_astar.connect_points(leaf.astar_id, neighbor.astar_id)
+				if neighbor.astar_id < 0:
+					continue
+				if _astar.are_points_connected(leaf.astar_id, neighbor.astar_id):
+					continue
+				if dir >= QuadTree.Direction.NE and not _is_diagonal_passable(leaf, neighbor):
+					continue
+				_astar.connect_points(leaf.astar_id, neighbor.astar_id)
 
 	if debug_enabled:
 		_draw_debug_grid()
@@ -95,6 +99,17 @@ func _make_passability_checker(space_state: PhysicsDirectSpaceState3D) -> Callab
 			if not calc.check_passability(center, half_size, space_state):
 				return false
 		return true
+
+func _is_diagonal_passable(a: QuadTree.Cell, b: QuadTree.Cell) -> bool:
+	var corner1 := Vector3(a.center.x, 0.0, b.center.z)
+	var corner2 := Vector3(b.center.x, 0.0, a.center.z)
+	var cell1 := QuadTree.find_leaf_at(_root, corner1)
+	var cell2 := QuadTree.find_leaf_at(_root, corner2)
+	if cell1 != null and cell1.is_blocked:
+		return false
+	if cell2 != null and cell2.is_blocked:
+		return false
+	return true
 
 static func _next_power_of_2(value: float) -> int:
 	var p := 1
