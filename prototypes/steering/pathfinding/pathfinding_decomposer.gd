@@ -31,6 +31,15 @@ extends Decomposer3D
 ## lookahead collapses the target closer than this, the base lookahead is used.
 @export var min_goal_distance: float = 0.5
 
+@export_group("Line of Sight")
+## When enabled, the decomposer verifies that the agent can see the lookahead
+## point via terrain-following raycasts. If obstructed, the point is pulled
+## back to the farthest visible position along the path.
+@export var los_check_enabled: bool = true
+## Number of binary-search iterations to refine the visible/non-visible
+## boundary within a path segment. Higher = more precise but more raycasts.
+@export_range(0, 8) var los_refine_iterations: int = 4
+
 var _service: Pathfinder3D
 var _service_checked: bool = false
 var _height_provider: HeightProvider
@@ -43,6 +52,7 @@ var _lookahead_distance: float ## Computed at startup: slow_radius + lookahead_m
 
 var debug_path: PackedVector3Array ## Current cached path, read by SteeringDebugDraw.
 var debug_lookahead_point: Vector3 ## Lookahead target, read by SteeringDebugDraw.
+var debug_los_pulled_back: bool ## True when LOS check pulled the lookahead back this frame.
 
 func _init() -> void:
 	resource_local_to_scene = true
@@ -69,10 +79,21 @@ func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
 	var effective_lookahead := _get_adaptive_lookahead()
 	var target_point := _get_lookahead_point(effective_lookahead)
 
+	# LOS validation: ensure the agent can see the lookahead point. If obstructed,
+	# pull back to the farthest visible position along the path.
+	var los_pulled_back := false
+	if los_check_enabled:
+		var space_state := agent.get_world_3d().direct_space_state
+		if not _has_line_of_sight(agent.global_position, target_point, space_state):
+			target_point = _find_visible_lookahead(
+				agent.global_position, effective_lookahead, space_state)
+			los_pulled_back = true
+
 	# Euclidean distance floor: at sharp corners, path-distance and straight-line
 	# distance diverge. If the adaptive lookahead collapsed the target too close,
 	# extend to the full base lookahead so the actuator doesn't treat it as arrived.
-	if agent.global_position.distance_to(target_point) < min_goal_distance:
+	# Skip when LOS caused the pullback — extending would just break LOS again.
+	if not los_pulled_back and agent.global_position.distance_to(target_point) < min_goal_distance:
 		target_point = _get_lookahead_point(_lookahead_distance)
 
 	var new_goal := Goal3D.new()
@@ -83,6 +104,7 @@ func decompose(agent: Node3D, goal: Goal3D) -> Goal3D:
 	debug_path = _cached_path.duplicate()
 	debug_path[0] = agent.global_position
 	debug_lookahead_point = target_point
+	debug_los_pulled_back = los_pulled_back
 	return new_goal
 
 func _ensure_service(agent: Node3D) -> bool:
@@ -179,6 +201,7 @@ func _get_lookahead_point(distance: float) -> Vector3:
 		distance -= seg_len
 	return _cached_path[_cached_path.size() - 1]
 
+
 ## Returns a lookahead distance reduced when a sharp turn is detected ahead on
 ## the path. Placing the sub-goal closer triggers the actuator's arrive
 ## deceleration before the corner.
@@ -196,6 +219,26 @@ func _get_adaptive_lookahead() -> float:
 			var proximity := clampf(dist / base, min_lookahead_factor, 1.0)
 			return base * proximity
 	return base
+
+
+## Binary-searches over path distance to find the farthest point within
+## [param lookahead_dist] that is visible from [param agent_pos].
+func _find_visible_lookahead(
+	agent_pos: Vector3,
+	lookahead_dist: float,
+	space_state: PhysicsDirectSpaceState3D
+) -> Vector3:
+	var lo := 0.0
+	var hi := lookahead_dist
+	for _iter in los_refine_iterations:
+		var mid := (lo + hi) * 0.5
+		var point := _get_lookahead_point(mid)
+		if _has_line_of_sight(agent_pos, point, space_state):
+			lo = mid
+		else:
+			hi = mid
+	lo = maxf(lo, min_goal_distance)
+	return _get_lookahead_point(lo)
 
 
 ## Returns the distance along the path from the current projection to waypoint [param idx].

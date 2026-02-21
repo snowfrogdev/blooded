@@ -22,6 +22,7 @@ class_name SteeringDebugDraw extends MeshInstance3D
 @export var shape_outline_color: Color = Color(1, 1, 1, 0.2)
 @export var path_color: Color = Color(0.2, 0.6, 1.0, 0.8)
 @export var waypoint_color: Color = Color.YELLOW
+@export var los_pullback_color: Color = Color(1.0, 0.4, 0.0, 1.0)
 @export var target_color: Color = Color(1, 0.3, 0.7, 0.9)
 @export var path_half_width: float = 0.06
 
@@ -149,7 +150,8 @@ func _draw_pathfinding_path(decomposer: PathfindingDecomposer) -> void:
 			_im.surface_set_color(path_color)
 		_draw_thick_line(pts[i], pts[i + 1], path_half_width)
 	var lp := decomposer.debug_lookahead_point
-	_im.surface_set_color(waypoint_color)
+	var lp_color := los_pullback_color if decomposer.debug_los_pulled_back else waypoint_color
+	_im.surface_set_color(lp_color)
 	_draw_thick_line(lp - Vector3(0.3, 0, 0), lp + Vector3(0.3, 0, 0), path_half_width)
 	_draw_thick_line(lp - Vector3(0, 0, 0.3), lp + Vector3(0, 0, 0.3), path_half_width)
 
