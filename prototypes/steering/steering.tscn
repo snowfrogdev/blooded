@@ -114,19 +114,19 @@ script = ExtResource("3_sxr3c")
 metadata/_custom_type_script = "uid://dbndw8p05yam7"
 
 [node name="WallSegment" parent="Terrain3DObjects" unique_id=809691819 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54550934, 0, -12.178679)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54550934, 1.1768064, -12.178679)
 
 [node name="WallSegment2" parent="Terrain3DObjects" unique_id=2021733776 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5293045, 0, -12.178679)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5293045, 1.1147387, -12.178679)
 
 [node name="WallSegment3" parent="Terrain3DObjects" unique_id=1225824994 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.032233, 0, -11.640071)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.032233, 1.2113804, -11.640071)
 
 [node name="WallSegment4" parent="Terrain3DObjects" unique_id=1998324399 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54550934, 0, 5.424384)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.54550934, 0.9097942, 5.424384)
 
 [node name="WallSegment5" parent="Terrain3DObjects" unique_id=1811125488 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5293045, 0, 5.424384)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5293045, 0.9958869, 5.424384)
 
 [node name="WallSegment7" parent="Terrain3DObjects" unique_id=763798454 instance=ExtResource("4_qjys7")]
 transform = Transform3D(0.0037698504, 0, -0.9999929, 0, 1, 0, 0.9999929, 0, 0.0037698504, -10.07153, 0, 10.475935)
@@ -153,7 +153,7 @@ transform = Transform3D(0.0037698504, 0, -0.9999929, 0, 1, 0, 0.9999929, 0, 0.00
 transform = Transform3D(0.0037698504, 0, -0.9999929, 0, 1, 0, 0.9999929, 0, 0.0037698504, 4.6692805, 0, 23.743935)
 
 [node name="WallSegment6" parent="Terrain3DObjects" unique_id=924350081 instance=ExtResource("4_qjys7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.032233, 0, 7.360999)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.032233, 0.8898302, 7.360999)
 
 [node name="WallSegment15" parent="Terrain3DObjects" unique_id=696756732 instance=ExtResource("4_qjys7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5222492, 0, 17.949879)
@@ -168,25 +168,25 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5222492, 0, 25.59369)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.413387, 0, 25.585842)
 
 [node name="Fence" parent="Terrain3DObjects" unique_id=2034714734 instance=ExtResource("5_rfqfv")]
-transform = Transform3D(0.8221142, 0, 0.5693226, 0, 1, 0, -0.5693226, 0, 0.8221142, -7.1148705, 0, -3.83916)
+transform = Transform3D(0.8221142, 0, 0.5693226, 0, 1, 0, -0.5693226, 0, 0.8221142, -7.1148705, 0.008499899, -3.83916)
 
 [node name="Building" parent="Terrain3DObjects" unique_id=1032823410 instance=ExtResource("6_j6ui3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.867999, 0, -23.039738)
 
 [node name="Rock" parent="Terrain3DObjects" unique_id=1509885845 instance=ExtResource("7_ifalb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.261713, 0, 1.6024418)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22.261713, 1.1423707, 1.6024418)
 
 [node name="BoulderCluster" parent="Terrain3DObjects" unique_id=2129215066 instance=ExtResource("8_usp30")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.101799, 0, 2.4627094)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.101799, 0.34158745, 2.4627094)
 
 [node name="Barrel" parent="Terrain3DObjects" unique_id=402087858 instance=ExtResource("9_w3jct")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.099485, 0, -3.2576838)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.099485, 1.0996629, -3.2576838)
 
 [node name="Barrel2" parent="Terrain3DObjects" unique_id=444419963 instance=ExtResource("9_w3jct")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.100504, 0, -12.492236)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.100504, 0.02129009, -12.492236)
 
 [node name="Tree" parent="Terrain3DObjects" unique_id=1860366873 instance=ExtResource("4_j1yq2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.1446, 0, -10.014116)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.1446, 1.4051049, -10.014116)
 
 [node name="Tree2" parent="Terrain3DObjects" unique_id=2080704121 instance=ExtResource("4_j1yq2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.555096, 0, -12.83094)
