@@ -71,6 +71,9 @@ func _process(_delta: float) -> void:
 				has_constraint_lines = true
 			if draw_avoidance_zones and constraint.debug_violated:
 				has_constraint_lines = true
+		elif constraint is DriftConstraint and constraint.debug_enabled:
+			if draw_whisker_rays:
+				has_constraint_lines = true
 
 	if has_constraint_lines:
 		_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
@@ -82,6 +85,9 @@ func _process(_delta: float) -> void:
 					_draw_sub_goals(constraint)
 				if draw_avoidance_zones:
 					_draw_avoidance_zone(constraint)
+			elif constraint is DriftConstraint and constraint.debug_enabled:
+				if draw_whisker_rays:
+					_draw_drift_ray(constraint)
 		_im.surface_end()
 
 	if draw_target and _moveable and _moveable.has_target:
@@ -126,6 +132,14 @@ func _draw_sub_goals(constraint: AvoidObstacleConstraint) -> void:
 	# Lines from obstacle center to each candidate.
 	_draw_line(constraint.debug_obstacle_center, constraint.debug_candidate_a, rejected_goal_color)
 	_draw_line(constraint.debug_obstacle_center, constraint.debug_candidate_b, rejected_goal_color)
+
+
+func _draw_drift_ray(constraint: DriftConstraint) -> void:
+	if constraint.debug_velocity_ray_hit:
+		_draw_line(constraint.debug_velocity_ray_from, constraint.debug_velocity_ray_hit_point, Color.ORANGE)
+		_draw_cross(constraint.debug_velocity_ray_hit_point, 0.2, Color.ORANGE)
+	else:
+		_draw_line(constraint.debug_velocity_ray_from, constraint.debug_velocity_ray_to, Color(0.0, 0.8, 0.3, 0.5))
 
 
 func _draw_avoidance_zone(constraint: AvoidObstacleConstraint) -> void:

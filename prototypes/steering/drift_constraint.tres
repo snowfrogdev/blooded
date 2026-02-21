@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DriftConstraint" format=3]
+
+[ext_resource type="Script" path="res://prototypes/steering/drift_constraint.gd" id="1_drift"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_drift")
+agent_radius = 0.31
+margin = 0.5
+time_horizon = 0.5
+min_speed = 0.5
+debug_enabled = true

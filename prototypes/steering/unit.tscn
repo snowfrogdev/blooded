@@ -13,7 +13,8 @@
 [ext_resource type="Script" uid="uid://sqchohioaal8" path="res://prototypes/steering/steering_pipeline/decomposer_3d.gd" id="8_grkff"]
 [ext_resource type="Resource" uid="uid://br557a4cbtlud" path="res://prototypes/steering/pathfinding/pathfinding_decomposer.tres" id="9_cv31l"]
 [ext_resource type="Resource" uid="uid://ddk8oysvyj7e7" path="res://prototypes/steering/avoid_obstacle_constraint.tres" id="9_kqq7p"]
-[ext_resource type="Script" uid="uid://c1jodm7dt2gmf" path="res://prototypes/steering/debug/steering_debug_draw.gd" id="10_debug"]
+[ext_resource type="Resource" path="res://prototypes/steering/drift_constraint.tres" id="10_drift"]
+[ext_resource type="Script" uid="uid://c1jodm7dt2gmf" path="res://prototypes/steering/debug/steering_debug_draw.gd" id="11_debug"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
 albedo_color = Color(0.3, 0.3, 0.3, 1)
@@ -64,7 +65,7 @@ metadata/_custom_type_script = "uid://bpqfugve7hvvx"
 script = ExtResource("3_b4fmm")
 targeters = Array[ExtResource("4_x85kt")]([ExtResource("4_uxfk2")])
 decomposers = Array[ExtResource("8_grkff")]([ExtResource("9_cv31l")])
-constraints = Array[ExtResource("8_46gd5")]([ExtResource("9_kqq7p")])
+constraints = Array[ExtResource("8_46gd5")]([ExtResource("9_kqq7p"), ExtResource("10_drift")])
 actuator = ExtResource("5_lt827")
 kinematic = NodePath("../GroundedKinematic3D")
 deadlock_fallback = ExtResource("6_lt827")
@@ -93,4 +94,4 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.90060925, 0)
 shape = SubResource("CapsuleShape3D_it2j7")
 
 [node name="SteeringDebugDraw" type="MeshInstance3D" parent="." unique_id=861644994]
-script = ExtResource("10_debug")
+script = ExtResource("11_debug")
