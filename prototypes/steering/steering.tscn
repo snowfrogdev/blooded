@@ -16,6 +16,7 @@
 [ext_resource type="Resource" uid="uid://gye6atp68t87" path="res://prototypes/steering/terrain_3d_height_provider.tres" id="7_usp30"]
 [ext_resource type="PackedScene" uid="uid://ncbp41630b43" path="res://prototypes/steering/obstacles/boulder_cluster.tscn" id="8_usp30"]
 [ext_resource type="PackedScene" uid="uid://d2r8lrm8t58y3" path="res://prototypes/steering/obstacles/barrel.tscn" id="9_w3jct"]
+[ext_resource type="Script" uid="uid://bqb8qowv1y3uc" path="res://prototypes/steering/steering_mode_toggle.gd" id="10_toggle"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
 sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
@@ -195,3 +196,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.555096, 0, -12.83094)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.878006, 0, -7.511242)
 
 [node name="Unit" parent="." unique_id=777597374 instance=ExtResource("5_gwcnc")]
+
+[node name="SteeringModeToggle" type="CanvasLayer" parent="." unique_id=1255936418]
+script = ExtResource("10_toggle")
