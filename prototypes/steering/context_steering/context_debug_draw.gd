@@ -74,6 +74,7 @@ func _process(_delta: float) -> void:
 
 	# --- Lines: effective, danger, chosen direction ---
 	if draw_effective or draw_danger or draw_chosen_direction:
+		var has_verts := false
 		_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)
 
 		if draw_effective:
@@ -82,6 +83,7 @@ func _process(_delta: float) -> void:
 				if val > 0.0:
 					var end: Vector3 = origin + map_dirs[i] * val * ray_scale
 					_draw_line(origin, end, effective_color)
+					has_verts = true
 
 		if draw_danger:
 			for i in _steering.debug_danger.size():
@@ -89,11 +91,18 @@ func _process(_delta: float) -> void:
 				if val > 0.0:
 					var end: Vector3 = origin + map_dirs[i] * val * ray_scale
 					_draw_line(origin, end, danger_color)
+					has_verts = true
 
 		if draw_chosen_direction and _steering.debug_chosen_strength > 0.0:
 			var end: Vector3 = origin + _steering.debug_chosen_direction * _steering.debug_chosen_strength * ray_scale
 			_draw_line(origin, end, chosen_color)
+			has_verts = true
 
+		if not has_verts:
+			# Add a degenerate line so surface_end doesn't error.
+			_im.surface_set_color(Color.TRANSPARENT)
+			_im.surface_add_vertex(origin)
+			_im.surface_add_vertex(origin)
 		_im.surface_end()
 
 	_draw_target_and_path(origin)
