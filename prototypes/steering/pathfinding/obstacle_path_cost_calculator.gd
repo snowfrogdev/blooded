@@ -35,11 +35,11 @@ func setup(context: Node) -> void:
 		half *= 0.5
 
 
-func check_passability(
+func check_cell(
 	pos: Vector3,
 	cell_half_size: float,
 	space_state: PhysicsDirectSpaceState3D
-) -> bool:
+) -> CellResult:
 	var shape: BoxShape3D = _shapes_by_half_size.get(cell_half_size)
 	if not shape:
 		# Fallback: create on-the-fly for unexpected sizes
@@ -53,5 +53,6 @@ func check_passability(
 	params.collision_mask = obstacle_mask
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
-	return space_state.intersect_shape(params, 1).is_empty()
-	
+	if space_state.intersect_shape(params, 1).is_empty():
+		return CellResult.PASSABLE
+	return CellResult.IMPASSABLE

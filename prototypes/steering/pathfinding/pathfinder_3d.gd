@@ -94,11 +94,15 @@ func _build_grid() -> void:
 		_draw_debug_grid()
 
 func _make_passability_checker(space_state: PhysicsDirectSpaceState3D) -> Callable:
-	return func(center: Vector3, half_size: float) -> bool:
+	return func(center: Vector3, half_size: float) -> PathCostCalculator.CellResult:
+		var dominated := PathCostCalculator.CellResult.PASSABLE
 		for calc in cost_calculators:
-			if not calc.check_passability(center, half_size, space_state):
-				return false
-		return true
+			var r := calc.check_cell(center, half_size, space_state)
+			if r == PathCostCalculator.CellResult.IMPASSABLE:
+				return r # Short-circuit: impassable dominates
+			if r == PathCostCalculator.CellResult.SUBDIVIDE:
+				dominated = r # Accumulate: subdivide if any calculator requests it
+		return dominated
 
 func _is_diagonal_passable(a: QuadTree.Cell, b: QuadTree.Cell) -> bool:
 	var corner1 := Vector3(a.center.x, 0.0, b.center.z)

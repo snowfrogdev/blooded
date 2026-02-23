@@ -30,11 +30,14 @@ class Cell:
 
 ## Recursively build the quadtree. Returns the root cell.
 ## [param height_provider] supplies ground elevation at cell centers.
-## [param cell_checker] is called as cell_checker.call(center: Vector3, half_size: float) -> bool
-## and should return true if the cell is free (no obstacles).
+## [param cell_checker] is called as
+## [code]cell_checker.call(center: Vector3, half_size: float) -> PathCostCalculator.CellResult[/code].
+## [constant PathCostCalculator.PASSABLE] produces a free leaf,
+## [constant PathCostCalculator.IMPASSABLE] subdivides or blocks at min size,
+## [constant PathCostCalculator.SUBDIVIDE] subdivides or degrades to passable at min size.
 static func build(
-	center_xz: Vector2, 
-	half_size: float, 
+	center_xz: Vector2,
+	half_size: float,
 	min_cell_size: float,
 	height_provider: HeightProvider,
 	cell_checker: Callable
@@ -44,16 +47,17 @@ static func build(
 	cell.center = Vector3(center_xz.x, y, center_xz.y)
 	cell.half_size = half_size
 
-	var is_free: bool = cell_checker.call(cell.center, half_size)
+	var result: int = cell_checker.call(cell.center, half_size)
 
-	if is_free:
+	if result == PathCostCalculator.CellResult.PASSABLE:
 		return cell # Entirely free - leaf
 
 	if half_size <= min_cell_size:
-		cell.is_blocked = true # At min size - conservatively block
+		# At min size: IMPASSABLE blocks, SUBDIVIDE degrades to passable
+		cell.is_blocked = (result == PathCostCalculator.CellResult.IMPASSABLE)
 		return cell
 
-	# Not free and above min size - subdivide
+	# Above min size: both IMPASSABLE and SUBDIVIDE trigger subdivision
 	var q := half_size * 0.5
 	var offsets: Array[Vector2] = [
 		Vector2(-q, +q), # NW
