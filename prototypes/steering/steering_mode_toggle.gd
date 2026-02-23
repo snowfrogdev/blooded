@@ -2,7 +2,7 @@ class_name SteeringModeToggle
 extends CanvasLayer
 ## UI toggle to switch all units between Pipeline and Context steering modes.
 
-var _current_mode: StringName = &"pipeline"
+var _current_mode: StringName = &"context"
 var _label: Label
 
 
@@ -17,7 +17,7 @@ func _ready() -> void:
 	hbox.add_child(button)
 
 	_label = Label.new()
-	_label.text = "Pipeline"
+	_label.text = "Context"
 	hbox.add_child(_label)
 
 
