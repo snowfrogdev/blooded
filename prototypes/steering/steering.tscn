@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="5_gwcnc"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/fence.tscn" id="5_rfqfv"]
 [ext_resource type="Resource" uid="uid://cgnij8ntvxidc" path="res://prototypes/steering/pathfinding/obstacle_path_cost_calculator.tres" id="5_w3jct"]
+[ext_resource type="Resource" path="res://prototypes/steering/pathfinding/slope_path_cost_calculator.tres" id="slope_calc"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/building.tscn" id="6_j6ui3"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/rock.tscn" id="7_ifalb"]
 [ext_resource type="Resource" uid="uid://gye6atp68t87" path="res://prototypes/steering/terrain_3d_height_provider.tres" id="7_usp30"]
@@ -106,7 +107,7 @@ metadata/_edit_lock_ = true
 [node name="Pathfinder3D" type="Node3D" parent="." unique_id=729155240 groups=["pathfinding"]]
 script = ExtResource("3_ifalb")
 min_cell_size = 0.5
-cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct")])
+cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct"), ExtResource("slope_calc")])
 height_provider = ExtResource("7_usp30")
 debug_enabled = true
 
