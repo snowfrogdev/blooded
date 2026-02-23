@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="DriftConstraint" format=3]
 
-[ext_resource type="Script" path="res://prototypes/steering/drift_constraint.gd" id="1_drift"]
+[ext_resource type="Script" path="res://prototypes/steering/steering_pipeline/drift_constraint.gd" id="1_drift"]
 
 [resource]
 resource_local_to_scene = true

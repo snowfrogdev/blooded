@@ -4,16 +4,16 @@
 [ext_resource type="Script" uid="uid://d3xy8rq5avoyc" path="res://prototypes/steering/steering_pipeline/steering_pipeline_3d.gd" id="3_b4fmm"]
 [ext_resource type="Script" uid="uid://bpqfugve7hvvx" path="res://prototypes/steering/kinematic/grounded_kinematic_3d.gd" id="3_y3ubw"]
 [ext_resource type="Resource" uid="uid://gye6atp68t87" path="res://prototypes/steering/terrain_3d_height_provider.tres" id="4_p0s6f"]
-[ext_resource type="Resource" uid="uid://bbwdwcn7w0tax" path="res://prototypes/steering/move_to_targeter.tres" id="4_uxfk2"]
+[ext_resource type="Resource" uid="uid://bbwdwcn7w0tax" path="res://prototypes/steering/steering_pipeline/move_to_targeter.tres" id="4_uxfk2"]
 [ext_resource type="Script" uid="uid://bwodqsdg38fr3" path="res://prototypes/steering/steering_pipeline/targeter_3d.gd" id="4_x85kt"]
-[ext_resource type="Resource" uid="uid://2nlevk8yncjg" path="res://prototypes/steering/arrive_actuator.tres" id="5_lt827"]
-[ext_resource type="Resource" uid="uid://dq1s0irvh1u52" path="res://prototypes/steering/stop_steering_behavior.tres" id="6_lt827"]
+[ext_resource type="Resource" uid="uid://2nlevk8yncjg" path="res://prototypes/steering/steering_pipeline/arrive_actuator.tres" id="5_lt827"]
+[ext_resource type="Resource" uid="uid://dq1s0irvh1u52" path="res://prototypes/steering/steering_pipeline/stop_steering_behavior.tres" id="6_lt827"]
 [ext_resource type="Script" uid="uid://debd0jyq4vqjb" path="res://prototypes/steering/moveable_3d.gd" id="7_moveable"]
 [ext_resource type="Script" uid="uid://bv70v07o82yy1" path="res://prototypes/steering/steering_pipeline/constraint_3d.gd" id="8_46gd5"]
 [ext_resource type="Script" uid="uid://sqchohioaal8" path="res://prototypes/steering/steering_pipeline/decomposer_3d.gd" id="8_grkff"]
 [ext_resource type="Resource" uid="uid://br557a4cbtlud" path="res://prototypes/steering/pathfinding/pathfinding_decomposer.tres" id="9_cv31l"]
-[ext_resource type="Resource" uid="uid://ddk8oysvyj7e7" path="res://prototypes/steering/avoid_obstacle_constraint.tres" id="9_kqq7p"]
-[ext_resource type="Resource" path="res://prototypes/steering/drift_constraint.tres" id="10_drift"]
+[ext_resource type="Resource" uid="uid://ddk8oysvyj7e7" path="res://prototypes/steering/steering_pipeline/avoid_obstacle_constraint.tres" id="9_kqq7p"]
+[ext_resource type="Resource" path="res://prototypes/steering/steering_pipeline/drift_constraint.tres" id="10_drift"]
 [ext_resource type="Script" uid="uid://c1jodm7dt2gmf" path="res://prototypes/steering/debug/steering_debug_draw.gd" id="11_debug"]
 [ext_resource type="Script" path="res://prototypes/steering/context_steering/context_steering_3d.gd" id="12_ctxsteer"]
 [ext_resource type="Script" path="res://prototypes/steering/context_steering/context_actuator.gd" id="13_ctxact"]
@@ -95,6 +95,7 @@ height_provider = ExtResource("4_p0s6f")
 metadata/_custom_type_script = "uid://bpqfugve7hvvx"
 
 [node name="SteeringPipeline" type="Node" parent="." unique_id=397245993 node_paths=PackedStringArray("kinematic")]
+process_mode = 4
 script = ExtResource("3_b4fmm")
 targeters = Array[ExtResource("4_x85kt")]([ExtResource("4_uxfk2")])
 decomposers = Array[ExtResource("8_grkff")]([ExtResource("9_cv31l")])
@@ -127,10 +128,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.90060925, 0)
 shape = SubResource("CapsuleShape3D_it2j7")
 
 [node name="SteeringDebugDraw" type="MeshInstance3D" parent="." unique_id=861644994]
+process_mode = 4
 script = ExtResource("11_debug")
 
 [node name="ContextSteering3D" type="Node" parent="." node_paths=PackedStringArray("kinematic")]
-process_mode = 4
 script = ExtResource("12_ctxsteer")
 behaviors = Array[ExtResource("17_ctxbhv")]([SubResource("Resource_seek"), SubResource("Resource_danger")])
 path_provider = SubResource("Resource_ctxpath")
@@ -138,5 +139,4 @@ actuator = SubResource("Resource_ctxact")
 kinematic = NodePath("../GroundedKinematic3D")
 
 [node name="ContextDebugDraw" type="MeshInstance3D" parent="."]
-process_mode = 4
 script = ExtResource("18_ctxdbg")

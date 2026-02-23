@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="AvoidObstacleConstraint" format=3 uid="uid://ddk8oysvyj7e7"]
 
-[ext_resource type="Script" uid="uid://b15l8o4x64tvh" path="res://prototypes/steering/avoid_obstacle_constraint.gd" id="1_mdr1o"]
+[ext_resource type="Script" uid="uid://b15l8o4x64tvh" path="res://prototypes/steering/steering_pipeline/avoid_obstacle_constraint.gd" id="1_mdr1o"]
 
 [resource]
 script = ExtResource("1_mdr1o")

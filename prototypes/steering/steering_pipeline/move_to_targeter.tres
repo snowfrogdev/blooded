@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="MoveToTargeter" format=3 uid="uid://bbwdwcn7w0tax"]
 
-[ext_resource type="Script" path="res://prototypes/steering/move_to_targeter.gd" id="1_cw02w"]
+[ext_resource type="Script" path="res://prototypes/steering/steering_pipeline/move_to_targeter.gd" id="1_cw02w"]
 
 [resource]
 script = ExtResource("1_cw02w")
