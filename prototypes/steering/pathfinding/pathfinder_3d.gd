@@ -133,6 +133,19 @@ func find_path(from: Vector3, to: Vector3) -> PackedVector3Array:
 		return PackedVector3Array()
 	return _astar.get_point_path(from_id, to_id)
 
+## Returns true if a path exists between [param from] and [param to].
+## Returns true for same-cell positions (trivially reachable).
+func is_reachable(from: Vector3, to: Vector3) -> bool:
+	if not _grid_built:
+		return false
+	var from_id := _get_cell_id(from)
+	var to_id := _get_cell_id(to)
+	if from_id == -1 or to_id == -1:
+		return false
+	if from_id == to_id:
+		return true
+	return not _astar.get_point_path(from_id, to_id).is_empty()
+
 ## Returns true if [param pos] lands in a free (passable) leaf cell.
 func is_position_free(pos: Vector3) -> bool:
 	var leaf := QuadTree.find_leaf_at(_root, pos)

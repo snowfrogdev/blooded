@@ -176,6 +176,11 @@ func _replan(agent: Node3D, moveable: Moveable3D) -> void:
 			moveable.target_position = _snapped_goal
 		_cached_path[_cached_path.size() - 1] = _snapped_goal
 	else:
+		# Empty path: either same-cell (fine) or unreachable (should stop).
+		if not _service.is_reachable(agent.global_position, goal_pos):
+			moveable.clear_target()
+			_cached_path = PackedVector3Array()
+			return
 		_snapped_goal = goal_pos
 	if _cached_path.size() > 2:
 		_cached_path = _smooth_path(agent, _cached_path)
