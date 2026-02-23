@@ -11,6 +11,10 @@ extends Resource
 ## Re-query the path when the agent drifts farther than this from the cached path.
 @export var agent_drift_threshold: float = 5.0
 @export_flags_3d_physics var obstacle_mask: int = 4
+## Terrain collision layer for path-smoothing LOS checks. Straight-line rays
+## that include this mask detect terrain features (mounds, ridges) that protrude
+## above the line between two waypoints.
+@export_flags_3d_physics var terrain_mask: int = 1
 ## Half-width of the unit body for flanking LOS checks.
 @export var agent_radius: float = 0.31
 
@@ -264,7 +268,7 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 	while current < path.size() - 1:
 		var farthest := current + 1
 		for i in range(current + 2, path.size()):
-			if _has_line_of_sight(path[current], path[i], space_state):
+			if _has_straight_line_of_sight(path[current], path[i], space_state):
 				farthest = i
 		result.append(path[farthest])
 		current = farthest
@@ -308,6 +312,44 @@ func _terrain_lifted_point(pos: Vector3, lift: Vector3) -> Vector3:
 	if _height_provider:
 		return Vector3(pos.x, _height_provider.get_height(pos), pos.z) + lift
 	return pos + lift
+
+
+## Straight-line LOS check used by path smoothing. Casts rays directly between
+## lifted endpoints (not surface-following) so terrain features like mounds and
+## ridges that protrude above the line are detected.
+func _has_straight_line_of_sight(
+	from_pos: Vector3, to_pos: Vector3, space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var lift := Vector3(0, 0.5, 0)
+	var from_lifted := from_pos + lift
+	var to_lifted := to_pos + lift
+
+	# Center ray
+	if not _cast_smoothing_ray(from_lifted, to_lifted, space_state):
+		return false
+
+	# Flanking rays for agent width
+	var dir := to_pos - from_pos
+	if dir.length_squared() > 0.001 and agent_radius > 0.0:
+		var right := dir.normalized().cross(Vector3.UP) * agent_radius
+		if not _cast_smoothing_ray(from_lifted - right, to_lifted - right, space_state):
+			return false
+		if not _cast_smoothing_ray(from_lifted + right, to_lifted + right, space_state):
+			return false
+
+	return true
+
+
+func _cast_smoothing_ray(
+	from: Vector3, to: Vector3, space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var query := PhysicsRayQueryParameters3D.new()
+	query.from = from
+	query.to = to
+	query.collision_mask = obstacle_mask | terrain_mask
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	return space_state.intersect_ray(query).is_empty()
 
 
 func _cast_los_ray(from: Vector3, to: Vector3, space_state: PhysicsDirectSpaceState3D) -> bool:
