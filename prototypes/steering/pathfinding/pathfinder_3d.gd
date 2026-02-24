@@ -58,9 +58,9 @@ func _build_grid() -> void:
 	var space_state := get_world_3d().direct_space_state
 	var checker := _make_passability_checker(space_state)
 
-	# Compute power-of-2 root that covers grid_min..grid_max
+	# Compute root as min_cell_size * 2^n so subdivision lands exactly on min_cell_size.
 	var span := Vector2(grid_max.x - grid_min.x, grid_max.y - grid_min.y)
-	var root_size := _next_power_of_2(maxf(span.x, span.y))
+	var root_size := _next_aligned_size(maxf(span.x, span.y), min_cell_size)
 	var root_center := Vector2((grid_min.x + grid_max.x) * 0.5, (grid_min.y + grid_max.y) * 0.5)
 
 	_root = QuadTree.build(
@@ -115,11 +115,11 @@ func _is_diagonal_passable(a: QuadTree.Cell, b: QuadTree.Cell) -> bool:
 		return false
 	return true
 
-static func _next_power_of_2(value: float) -> int:
-	var p := 1
-	while p < value:
-		p *= 2
-	return p
+static func _next_aligned_size(span: float, cell_size: float) -> float:
+	var size := cell_size
+	while size < span:
+		size *= 2.0
+	return size
 
 
 ## Returns a path from [param from] to [param to] as world-space waypoints.
