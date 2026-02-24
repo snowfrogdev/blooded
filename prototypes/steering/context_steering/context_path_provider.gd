@@ -92,16 +92,22 @@ func get_desired_direction(agent: Node3D, moveable: Moveable3D) -> Vector3:
 
 	# LOS validation: ensure the agent can see the lookahead point. If obstructed,
 	# pull back to the farthest visible position along the path.
+	var los_adjusted := false
 	if los_check_enabled:
 		var space_state := agent.get_world_3d().direct_space_state
 		if not _has_line_of_sight(agent.global_position, target_point, space_state):
 			target_point = _find_visible_lookahead(
 				agent.global_position, effective_lookahead, space_state)
+			los_adjusted = true
 
 	# Euclidean distance floor: at sharp corners, path-distance and straight-line
 	# distance diverge. Prevent the lookahead from collapsing too close.
+	# When LOS pulled back the target, use the shorter adaptive distance as
+	# fallback — just past the corner, not all the way across the map.
+	# The danger system handles the actual wall avoidance.
 	if agent.global_position.distance_to(target_point) < min_goal_distance:
-		target_point = _get_lookahead_point(lookahead_distance)
+		var fallback_dist := effective_lookahead if los_adjusted else lookahead_distance
+		target_point = _get_lookahead_point(fallback_dist)
 
 	debug_path = _cached_path.duplicate()
 	debug_path[0] = agent.global_position
