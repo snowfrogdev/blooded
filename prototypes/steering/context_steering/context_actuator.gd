@@ -6,6 +6,7 @@ extends Resource
 ## open-field stopping at the destination.
 
 @export var max_speed: float = 4.0
+@export var min_speed: float = 1.5
 @export var max_acceleration: float = 4.0
 ## Distance at which the agent begins to decelerate toward the goal.
 @export var slow_radius: float = 3.0
@@ -28,16 +29,14 @@ func compute_steering(
 		return null
 
 	# Interest-derived speed: emergent from danger masking.
-	var interest_speed := strength * max_speed
-
-	# Distance-based arrive ramp for open-field stopping.
-	var arrive_speed: float
+	var arrive_speed := strength * max_speed
+	
 	if distance <= slow_radius:
 		arrive_speed = max_speed * distance / slow_radius
 	else:
 		arrive_speed = max_speed
 
-	var target_speed := minf(interest_speed, arrive_speed)
+	var target_speed := maxf(arrive_speed, min_speed)
 	var target_velocity := direction * target_speed
 
 	var safe_ttt := maxf(time_to_target, 0.01)

@@ -68,12 +68,12 @@ look_ahead = 4.0
 [sub_resource type="Resource" id="Resource_ctxpath"]
 resource_local_to_scene = true
 script = ExtResource("14_ctxpath")
+lookahead_distance = 7.5
 
 [sub_resource type="Resource" id="Resource_ctxact"]
 script = ExtResource("13_ctxact")
-max_speed = 8.0
-max_acceleration = 8.0
-slow_radius = 5.0
+max_speed = 7.5
+slow_radius = 7.5
 
 [node name="Unit" type="Node3D" unique_id=777597374]
 script = ExtResource("1_unit")
