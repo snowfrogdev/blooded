@@ -15,39 +15,13 @@
 [ext_resource type="Resource" uid="uid://ddk8oysvyj7e7" path="res://prototypes/steering/steering_pipeline/avoid_obstacle_constraint.tres" id="9_kqq7p"]
 [ext_resource type="Resource" path="res://prototypes/steering/steering_pipeline/drift_constraint.tres" id="10_drift"]
 [ext_resource type="Script" uid="uid://c1jodm7dt2gmf" path="res://prototypes/steering/debug/steering_debug_draw.gd" id="11_debug"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/context_steering_3d.gd" id="12_ctxsteer"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/context_actuator.gd" id="13_ctxact"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/context_path_provider.gd" id="14_ctxpath"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/seek_behavior.gd" id="15_seek"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/obstacle_danger_behavior.gd" id="16_danger"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/context_behavior_3d.gd" id="17_ctxbhv"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/context_debug_draw.gd" id="18_ctxdbg"]
-
-[sub_resource type="Resource" id="Resource_seek"]
-script = ExtResource("15_seek")
-
-[sub_resource type="Resource" id="Resource_danger"]
-script = ExtResource("16_danger")
-look_ahead = 3.0
-obstacle_mask = 4
-neighbor_spread = 0.5
-resource_local_to_scene = true
-
-[sub_resource type="Resource" id="Resource_ctxpath"]
-script = ExtResource("14_ctxpath")
-lookahead_distance = 6.0
-agent_drift_threshold = 5.0
-obstacle_mask = 4
-agent_radius = 0.31
-resource_local_to_scene = true
-
-[sub_resource type="Resource" id="Resource_ctxact"]
-script = ExtResource("13_ctxact")
-max_speed = 4.0
-max_acceleration = 4.0
-slow_radius = 3.0
-target_radius = 0.3
-time_to_target = 0.15
+[ext_resource type="Script" uid="uid://c4tlmovwun5ka" path="res://prototypes/steering/context_steering/context_steering_3d.gd" id="12_ctxsteer"]
+[ext_resource type="Script" uid="uid://b52sr4gfjxitr" path="res://prototypes/steering/context_steering/context_actuator.gd" id="13_ctxact"]
+[ext_resource type="Script" uid="uid://8yu8rm1goh17" path="res://prototypes/steering/context_steering/context_path_provider.gd" id="14_ctxpath"]
+[ext_resource type="Script" uid="uid://cehp5nfqt6rmy" path="res://prototypes/steering/context_steering/seek_behavior.gd" id="15_seek"]
+[ext_resource type="Script" uid="uid://dx5snylawu80x" path="res://prototypes/steering/context_steering/obstacle_danger_behavior.gd" id="16_danger"]
+[ext_resource type="Script" uid="uid://da7f8cqwti8v4" path="res://prototypes/steering/context_steering/context_behavior_3d.gd" id="17_ctxbhv"]
+[ext_resource type="Script" uid="uid://b3prcqu5d4sbm" path="res://prototypes/steering/context_steering/context_debug_draw.gd" id="18_ctxdbg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
 albedo_color = Color(0.3, 0.3, 0.3, 1)
@@ -82,6 +56,24 @@ albedo_color = Color(0.2, 0.9, 0.3, 1)
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_it2j7"]
 radius = 0.30810547
 height = 1.8150635
+
+[sub_resource type="Resource" id="Resource_seek"]
+script = ExtResource("15_seek")
+
+[sub_resource type="Resource" id="Resource_danger"]
+resource_local_to_scene = true
+script = ExtResource("16_danger")
+look_ahead = 4.0
+
+[sub_resource type="Resource" id="Resource_ctxpath"]
+resource_local_to_scene = true
+script = ExtResource("14_ctxpath")
+
+[sub_resource type="Resource" id="Resource_ctxact"]
+script = ExtResource("13_ctxact")
+max_speed = 8.0
+max_acceleration = 8.0
+slow_radius = 5.0
 
 [node name="Unit" type="Node3D" unique_id=777597374]
 script = ExtResource("1_unit")
@@ -131,12 +123,12 @@ shape = SubResource("CapsuleShape3D_it2j7")
 process_mode = 4
 script = ExtResource("11_debug")
 
-[node name="ContextSteering3D" type="Node" parent="." node_paths=PackedStringArray("kinematic")]
+[node name="ContextSteering3D" type="Node" parent="." unique_id=1961067219 node_paths=PackedStringArray("kinematic")]
 script = ExtResource("12_ctxsteer")
 behaviors = Array[ExtResource("17_ctxbhv")]([SubResource("Resource_seek"), SubResource("Resource_danger")])
 path_provider = SubResource("Resource_ctxpath")
 actuator = SubResource("Resource_ctxact")
 kinematic = NodePath("../GroundedKinematic3D")
 
-[node name="ContextDebugDraw" type="MeshInstance3D" parent="."]
+[node name="ContextDebugDraw" type="MeshInstance3D" parent="." unique_id=228603399]
 script = ExtResource("18_ctxdbg")
