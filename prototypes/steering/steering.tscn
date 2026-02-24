@@ -11,14 +11,14 @@
 [ext_resource type="PackedScene" uid="uid://bfb4ijafodwa7" path="res://prototypes/steering/unit.tscn" id="5_gwcnc"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/fence.tscn" id="5_rfqfv"]
 [ext_resource type="Resource" uid="uid://cgnij8ntvxidc" path="res://prototypes/steering/pathfinding/obstacle_path_cost_calculator.tres" id="5_w3jct"]
-[ext_resource type="Resource" path="res://prototypes/steering/pathfinding/slope_path_cost_calculator.tres" id="slope_calc"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/building.tscn" id="6_j6ui3"]
 [ext_resource type="PackedScene" path="res://prototypes/steering/obstacles/rock.tscn" id="7_ifalb"]
 [ext_resource type="Resource" uid="uid://gye6atp68t87" path="res://prototypes/steering/terrain_3d_height_provider.tres" id="7_usp30"]
 [ext_resource type="PackedScene" uid="uid://ncbp41630b43" path="res://prototypes/steering/obstacles/boulder_cluster.tscn" id="8_usp30"]
 [ext_resource type="PackedScene" uid="uid://d2r8lrm8t58y3" path="res://prototypes/steering/obstacles/barrel.tscn" id="9_w3jct"]
 [ext_resource type="Script" uid="uid://bqb8qowv1y3uc" path="res://prototypes/steering/steering_mode_toggle.gd" id="10_toggle"]
-[ext_resource type="Script" path="res://prototypes/steering/speed_display.gd" id="11_speed"]
+[ext_resource type="Script" uid="uid://b1qia40ptsgk8" path="res://prototypes/steering/speed_display.gd" id="11_speed"]
+[ext_resource type="Resource" path="res://prototypes/steering/pathfinding/slope_path_cost_calculator.tres" id="slope_calc"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
 sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
@@ -202,6 +202,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.878006, 0, -7.511242)
 [node name="SteeringModeToggle" type="CanvasLayer" parent="." unique_id=1255936418]
 script = ExtResource("10_toggle")
 
-[node name="SpeedDisplay" type="CanvasLayer" parent="." node_paths=PackedStringArray("selection_controller")]
+[node name="SpeedDisplay" type="CanvasLayer" parent="." unique_id=1775247775 node_paths=PackedStringArray("selection_controller")]
 script = ExtResource("11_speed")
 selection_controller = NodePath("../SelectionController")

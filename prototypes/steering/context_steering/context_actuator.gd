@@ -32,9 +32,7 @@ func compute_steering(
 	var arrive_speed := strength * max_speed
 	
 	if distance <= slow_radius:
-		arrive_speed = max_speed * distance / slow_radius
-	else:
-		arrive_speed = max_speed
+		arrive_speed = arrive_speed * distance / slow_radius
 
 	var target_speed := maxf(arrive_speed, min_speed)
 	var target_velocity := direction * target_speed
