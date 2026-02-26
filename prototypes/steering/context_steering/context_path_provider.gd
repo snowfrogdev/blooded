@@ -279,7 +279,8 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 	while current < path.size() - 1:
 		var farthest := current + 1
 		for i in range(current + 2, path.size()):
-			if _has_straight_line_of_sight(path[current], path[i], space_state):
+			if _has_straight_line_of_sight(path[current], path[i], space_state) \
+					and _has_underground_los(path[current], path[i], space_state):
 				farthest = i
 		result.append(path[farthest])
 		current = farthest
@@ -346,6 +347,30 @@ func _has_straight_line_of_sight(
 		if not _cast_smoothing_ray(from_lifted - right, to_lifted - right, space_state):
 			return false
 		if not _cast_smoothing_ray(from_lifted + right, to_lifted + right, space_state):
+			return false
+
+	return true
+
+
+## Underground LOS check for path smoothing. Detects terrain depressions
+## (canyons, ravines) that above-ground rays sail over. A depression from
+## underground is geometrically equivalent to a ridge from above.
+func _has_underground_los(
+	from_pos: Vector3, to_pos: Vector3, space_state: PhysicsDirectSpaceState3D
+) -> bool:
+	var drop := Vector3(0, 0.5, 0)
+	var from_below := from_pos - drop
+	var to_below := to_pos - drop
+
+	if not _cast_smoothing_ray(from_below, to_below, space_state):
+		return false
+
+	var dir := to_pos - from_pos
+	if dir.length_squared() > 0.001 and agent_radius > 0.0:
+		var right := dir.normalized().cross(Vector3.UP) * agent_radius
+		if not _cast_smoothing_ray(from_below - right, to_below - right, space_state):
+			return false
+		if not _cast_smoothing_ray(from_below + right, to_below + right, space_state):
 			return false
 
 	return true
