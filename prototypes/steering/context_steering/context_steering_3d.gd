@@ -31,6 +31,8 @@ func _ready() -> void:
 		if child is Moveable3D:
 			_moveable = child
 			break
+	if kinematic is GroundedKinematic3D and actuator:
+		actuator.setup(kinematic.height_provider)
 
 
 ## Called by [method Unit.set_steering_mode] to enable/disable this system.
