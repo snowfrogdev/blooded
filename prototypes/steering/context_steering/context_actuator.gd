@@ -24,11 +24,23 @@ extends Resource
 ## Slope ratio (rise/run) treated as maximum. Matches tan(45°) = 1.0.
 @export var max_slope_ratio: float = 1.0
 
+@export_group("Terrain")
+## How far ahead (meters) to sample terrain type for speed modulation.
+@export var terrain_sample_distance: float = 0.5
+## Speed multipliers keyed by [enum TerrainType.Type]. 1.0 = full speed.
+@export var terrain_speed_factors: Dictionary = TerrainType.SPEED_FACTORS
+
 var _height_provider: HeightProvider
+var _terrain: Terrain3D
 
 
-func setup(height_provider: HeightProvider) -> void:
+func _init() -> void:
+	resource_local_to_scene = true
+
+
+func setup(height_provider: HeightProvider, terrain: Terrain3D = null) -> void:
 	_height_provider = height_provider
+	_terrain = terrain
 
 
 func compute_steering(
@@ -47,6 +59,7 @@ func compute_steering(
 	# Interest-derived speed: emergent from danger masking.
 	var arrive_speed := strength * max_speed
 	arrive_speed *= _get_slope_factor(agent.global_position, direction)
+	arrive_speed *= _get_terrain_factor(agent.global_position, direction)
 
 	if distance <= slow_radius:
 		arrive_speed = arrive_speed * distance / slow_radius
@@ -74,3 +87,15 @@ func _get_slope_factor(position: Vector3, direction: Vector3) -> float:
 	if slope > 0.0:
 		return 1.0 - uphill_penalty * t
 	return 1.0 + downhill_bonus * t
+
+
+func _get_terrain_factor(position: Vector3, direction: Vector3) -> float:
+	if not _terrain or not is_instance_valid(_terrain) or not _terrain.data or terrain_speed_factors.is_empty():
+		return 1.0
+	var ahead := position + direction * terrain_sample_distance
+	var tex := _terrain.data.get_texture_id(ahead)
+	if is_nan(tex.x):
+		return 1.0
+	var base_factor: float = terrain_speed_factors.get(int(tex.x), 1.0)
+	var overlay_factor: float = terrain_speed_factors.get(int(tex.y), 1.0)
+	return lerpf(base_factor, overlay_factor, tex.z)

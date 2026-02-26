@@ -22,6 +22,8 @@
 [ext_resource type="Script" uid="uid://dx5snylawu80x" path="res://prototypes/steering/context_steering/obstacle_danger_behavior.gd" id="16_danger"]
 [ext_resource type="Script" uid="uid://da7f8cqwti8v4" path="res://prototypes/steering/context_steering/context_behavior_3d.gd" id="17_ctxbhv"]
 [ext_resource type="Script" uid="uid://b3prcqu5d4sbm" path="res://prototypes/steering/context_steering/context_debug_draw.gd" id="18_ctxdbg"]
+[ext_resource type="Script" path="res://prototypes/steering/context_steering/terrain_danger_behavior.gd" id="19_terrdng"]
+[ext_resource type="Script" path="res://prototypes/steering/context_steering/slope_danger_behavior.gd" id="20_slopedng"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
 albedo_color = Color(0.3, 0.3, 0.3, 1)
@@ -65,12 +67,21 @@ resource_local_to_scene = true
 script = ExtResource("16_danger")
 look_ahead = 4.0
 
+[sub_resource type="Resource" id="Resource_terrain_danger"]
+resource_local_to_scene = true
+script = ExtResource("19_terrdng")
+
+[sub_resource type="Resource" id="Resource_slope_danger"]
+resource_local_to_scene = true
+script = ExtResource("20_slopedng")
+
 [sub_resource type="Resource" id="Resource_ctxpath"]
 resource_local_to_scene = true
 script = ExtResource("14_ctxpath")
 lookahead_distance = 7.5
 
 [sub_resource type="Resource" id="Resource_ctxact"]
+resource_local_to_scene = true
 script = ExtResource("13_ctxact")
 max_speed = 7.5
 slow_radius = 7.5
@@ -125,7 +136,7 @@ script = ExtResource("11_debug")
 
 [node name="ContextSteering3D" type="Node" parent="." unique_id=1961067219 node_paths=PackedStringArray("kinematic")]
 script = ExtResource("12_ctxsteer")
-behaviors = Array[ExtResource("17_ctxbhv")]([SubResource("Resource_seek"), SubResource("Resource_danger")])
+behaviors = Array[ExtResource("17_ctxbhv")]([SubResource("Resource_seek"), SubResource("Resource_danger"), SubResource("Resource_terrain_danger"), SubResource("Resource_slope_danger")])
 path_provider = SubResource("Resource_ctxpath")
 actuator = SubResource("Resource_ctxact")
 kinematic = NodePath("../GroundedKinematic3D")

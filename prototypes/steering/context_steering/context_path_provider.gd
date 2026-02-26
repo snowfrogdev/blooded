@@ -34,6 +34,11 @@ extends Resource
 ## adaptive lookahead from collapsing too close at sharp corners.
 @export var min_goal_distance: float = 0.5
 
+@export_group("Smoothing")
+## Maximum relative cost increase allowed when smoothing shortcuts across
+## expensive terrain. 0.0 = strict (never increase cost), 0.1 = allow 10% increase.
+@export_range(0.0, 1.0) var smoothing_cost_tolerance: float = 0.1
+
 var _service: Pathfinder3D
 var _service_checked: bool = false
 var _height_provider: HeightProvider
@@ -280,13 +285,15 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 		var farthest := current + 1
 		for i in range(current + 2, path.size()):
 			if _has_straight_line_of_sight(path[current], path[i], space_state) \
-					and _has_underground_los(path[current], path[i], space_state):
+					and _service.is_shortcut_cost_acceptable(path, current, i, smoothing_cost_tolerance):
 				farthest = i
 		result.append(path[farthest])
 		current = farthest
 	return result
 
 
+## Maximum XZ distance between successive terrain-height samples during LOS checks.
+## Smaller = more accurate on steep terrain but more raycasts per smoothing pass.
 const LOS_STEP_SIZE: float = 1.0
 
 func _has_line_of_sight(
@@ -351,29 +358,6 @@ func _has_straight_line_of_sight(
 
 	return true
 
-
-## Underground LOS check for path smoothing. Detects terrain depressions
-## (canyons, ravines) that above-ground rays sail over. A depression from
-## underground is geometrically equivalent to a ridge from above.
-func _has_underground_los(
-	from_pos: Vector3, to_pos: Vector3, space_state: PhysicsDirectSpaceState3D
-) -> bool:
-	var drop := Vector3(0, 0.5, 0)
-	var from_below := from_pos - drop
-	var to_below := to_pos - drop
-
-	if not _cast_smoothing_ray(from_below, to_below, space_state):
-		return false
-
-	var dir := to_pos - from_pos
-	if dir.length_squared() > 0.001 and agent_radius > 0.0:
-		var right := dir.normalized().cross(Vector3.UP) * agent_radius
-		if not _cast_smoothing_ray(from_below - right, to_below - right, space_state):
-			return false
-		if not _cast_smoothing_ray(from_below + right, to_below + right, space_state):
-			return false
-
-	return true
 
 
 func _cast_smoothing_ray(

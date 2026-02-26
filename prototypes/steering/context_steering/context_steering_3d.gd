@@ -32,7 +32,9 @@ func _ready() -> void:
 			_moveable = child
 			break
 	if kinematic is GroundedKinematic3D and actuator:
-		actuator.setup(kinematic.height_provider)
+		var terrain_node = get_tree().get_first_node_in_group("terrain")
+		var terrain_3d: Terrain3D = terrain_node as Terrain3D if terrain_node else null
+		actuator.setup(kinematic.height_provider, terrain_3d)
 
 
 ## Called by [method Unit.set_steering_mode] to enable/disable this system.

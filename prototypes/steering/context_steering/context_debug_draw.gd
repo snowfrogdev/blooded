@@ -108,7 +108,7 @@ func _process(_delta: float) -> void:
 	_draw_target_and_path(origin)
 
 
-func _draw_target_and_path(origin: Vector3) -> void:
+func _draw_target_and_path(_origin: Vector3) -> void:
 	# --- Target cross ---
 	if draw_target and _moveable and _moveable.has_target:
 		_im.surface_begin(Mesh.PRIMITIVE_LINES, _material)

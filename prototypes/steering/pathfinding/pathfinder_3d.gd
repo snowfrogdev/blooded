@@ -18,7 +18,9 @@ extends Node3D
 @export var height_provider: HeightProvider
 ## Enable debug visualization of grid points and paths.
 @export var debug_enabled: bool = false
+@warning_ignore("unused_variable")
 @export_tool_button("Build Editor Grid") var _build_editor_grid_btn = _build_editor_grid
+@warning_ignore("unused_variable")
 @export_tool_button("Clear Editor Grid") var _clear_editor_grid_btn = _clear_editor_grid
 
 var _astar: WeightedAStar
@@ -153,6 +155,70 @@ func is_reachable(from: Vector3, to: Vector3) -> bool:
 	if from_id == to_id:
 		return true
 	return not _astar.get_point_path(from_id, to_id).is_empty()
+
+## Penalty threshold treating a smoothing sample as impassable. Must be below
+## the INF-replacement value used by cost calculators (IMPASSABLE_COST_STANDIN
+## in TerrainTypeCostCalculator) to catch edges that touch impassable terrain.
+const IMPASSABLE_PENALTY_THRESHOLD := 9.0
+
+## Maximum XZ distance between successive terrain-height samples during
+## cost-integration walks. Smaller = more accurate but more samples.
+const COST_STEP_SIZE: float = 1.0
+
+
+## Returns true if the straight-line cost from [param path]\[from_idx] to
+## [param path]\[to_idx] is within [param tolerance] of the original sub-path cost.
+func is_shortcut_cost_acceptable(
+	path: PackedVector3Array, from_idx: int, to_idx: int, tolerance: float
+) -> bool:
+	if cost_calculators.is_empty():
+		return true
+	var shortcut_cost := integrate_line_cost(path[from_idx], path[to_idx])
+	var original_cost := sum_subpath_cost(path, from_idx, to_idx)
+	return shortcut_cost <= original_cost * (1.0 + tolerance)
+
+
+## Walks a straight line from [param from_pos] to [param to_pos] in steps of
+## [constant COST_STEP_SIZE], summing distance * (1 + penalty). Returns INF if
+## any sample lands in a blocked cell or exceeds the impassable threshold.
+func integrate_line_cost(from_pos: Vector3, to_pos: Vector3) -> float:
+	var total_dist := from_pos.distance_to(to_pos)
+	if total_dist < 0.001:
+		return 0.0
+	var steps := maxi(1, ceili(total_dist / COST_STEP_SIZE))
+	var step_dist := total_dist / steps
+	var cost := 0.0
+	for i in steps:
+		var sample_from := from_pos.lerp(to_pos, float(i) / steps)
+		var sample_to := from_pos.lerp(to_pos, float(i + 1) / steps)
+		if height_provider:
+			sample_from.y = height_provider.get_height(sample_from)
+			sample_to.y = height_provider.get_height(sample_to)
+		if not is_position_free(sample_from) or not is_position_free(sample_to):
+			return INF
+		var penalty := 0.0
+		for calc in cost_calculators:
+			penalty += calc.get_cost_penalty(sample_from, sample_to)
+		if penalty > IMPASSABLE_PENALTY_THRESHOLD:
+			return INF
+		cost += step_dist * (1.0 + penalty)
+	return cost
+
+
+## Sums the cost along the original A* sub-path from [param from_idx] to
+## [param to_idx], using each calculator's penalty.
+func sum_subpath_cost(path: PackedVector3Array, from_idx: int, to_idx: int) -> float:
+	var cost := 0.0
+	for i in range(from_idx, to_idx):
+		var seg_from := path[i]
+		var seg_to := path[i + 1]
+		var base_dist := seg_from.distance_to(seg_to)
+		var penalty := 0.0
+		for calc in cost_calculators:
+			penalty += calc.get_cost_penalty(seg_from, seg_to)
+		cost += base_dist * (1.0 + penalty)
+	return cost
+
 
 ## Returns true if [param pos] lands in a free (passable) leaf cell.
 func is_position_free(pos: Vector3) -> bool:

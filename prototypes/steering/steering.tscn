@@ -19,6 +19,7 @@
 [ext_resource type="Script" uid="uid://bqb8qowv1y3uc" path="res://prototypes/steering/steering_mode_toggle.gd" id="10_toggle"]
 [ext_resource type="Script" uid="uid://b1qia40ptsgk8" path="res://prototypes/steering/speed_display.gd" id="11_speed"]
 [ext_resource type="Resource" path="res://prototypes/steering/pathfinding/slope_path_cost_calculator.tres" id="slope_calc"]
+[ext_resource type="Resource" path="res://prototypes/steering/pathfinding/terrain_type_cost_calculator.tres" id="terrain_calc"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_yesmu"]
 sky_horizon_color = Color(1.3882962, 1.494762, 1.4922913, 1)
@@ -110,7 +111,7 @@ script = ExtResource("3_ifalb")
 min_cell_size = 0.5
 grid_min = Vector2(-200, -200)
 grid_max = Vector2(200, 200)
-cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct"), ExtResource("slope_calc")])
+cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct"), ExtResource("slope_calc"), ExtResource("terrain_calc")])
 height_provider = ExtResource("7_usp30")
 debug_enabled = true
 

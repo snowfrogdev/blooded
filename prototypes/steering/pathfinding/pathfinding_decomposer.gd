@@ -31,6 +31,11 @@ extends Decomposer3D
 ## lookahead collapses the target closer than this, the base lookahead is used.
 @export var min_goal_distance: float = 0.5
 
+@export_group("Smoothing")
+## Maximum relative cost increase allowed when smoothing shortcuts across
+## expensive terrain. 0.0 = strict (never increase cost), 0.1 = allow 10% increase.
+@export_range(0.0, 1.0) var smoothing_cost_tolerance: float = 0.1
+
 @export_group("Line of Sight")
 ## When enabled, the decomposer verifies that the agent can see the lookahead
 ## point via terrain-following raycasts. If obstructed, the point is pulled
@@ -261,7 +266,8 @@ func _smooth_path(agent: Node3D, path: PackedVector3Array) -> PackedVector3Array
 	while current < path.size() - 1:
 		var farthest := current + 1
 		for i in range(current + 2, path.size()):
-			if _has_line_of_sight(path[current], path[i], space_state):
+			if _has_line_of_sight(path[current], path[i], space_state) \
+						and _service.is_shortcut_cost_acceptable(path, current, i, smoothing_cost_tolerance):
 				farthest = i
 		result.append(path[farthest])
 		current = farthest
