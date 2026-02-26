@@ -1,3 +1,4 @@
+@tool
 class_name PathCostCalculator
 extends Resource
 ## Base cost calculation strategy for pathfinding grid cells.

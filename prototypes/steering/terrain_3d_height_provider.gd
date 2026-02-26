@@ -1,3 +1,4 @@
+@tool
 class_name Terrain3DHeightProvider
 extends HeightProvider
 ## Height provider that reads elevation from a [Terrain3D] node.

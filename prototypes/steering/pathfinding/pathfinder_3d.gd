@@ -18,11 +18,15 @@ extends Node3D
 @export var height_provider: HeightProvider
 ## Enable debug visualization of grid points and paths.
 @export var debug_enabled: bool = false
+@export_tool_button("Build Editor Grid") var _build_editor_grid_btn = _build_editor_grid
+@export_tool_button("Clear Editor Grid") var _clear_editor_grid_btn = _clear_editor_grid
 
 var _astar: WeightedAStar
 var _root: QuadTree.Cell
 var _leaves: Array[QuadTree.Cell]
 var _grid_built: bool = false
+var _editor_grid_built: bool = false
+var _active_im: ImmediateMesh
 var _debug_mesh_instance: MeshInstance3D
 var _debug_im: ImmediateMesh
 var _editor_mesh_instance: MeshInstance3D
@@ -31,6 +35,9 @@ var _editor_im: ImmediateMesh
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
+	_root = null
+	_leaves = []
+	_editor_grid_built = false
 	_astar = WeightedAStar.new()
 	_astar.cost_calculators = cost_calculators
 	height_provider.setup(self)
@@ -44,7 +51,8 @@ func _process(_delta: float) -> void:
 		return
 	if not _editor_mesh_instance:
 		_setup_editor_bounds()
-	_draw_editor_bounds()
+	if not _editor_grid_built:
+		_draw_editor_bounds()
 
 func _physics_process(_delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -91,7 +99,7 @@ func _build_grid() -> void:
 				_astar.connect_points(leaf.astar_id, neighbor.astar_id)
 
 	if debug_enabled:
-		_draw_debug_grid()
+		_draw_grid(_debug_im, _debug_mesh_instance.material_override)
 
 func _make_passability_checker(space_state: PhysicsDirectSpaceState3D) -> Callable:
 	return func(center: Vector3, half_size: float) -> PathCostCalculator.CellResult:
@@ -200,6 +208,51 @@ func _draw_editor_bounds() -> void:
 	_editor_im.surface_add_vertex(a) # Close the loop
 	_editor_im.surface_end()
 
+func _build_editor_grid() -> void:
+	if not Engine.is_editor_hint():
+		return
+	if not height_provider:
+		push_warning("Pathfinder3D: Cannot build editor grid — no height_provider set.")
+		return
+	if cost_calculators.is_empty():
+		push_warning("Pathfinder3D: No cost calculators set. Grid will show all cells as passable.")
+
+	height_provider.setup(self)
+	for calc in cost_calculators:
+		calc.setup(self)
+
+	if not _editor_mesh_instance:
+		_setup_editor_bounds()
+	var mat := _editor_mesh_instance.material_override as StandardMaterial3D
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	var space_state := get_world_3d().direct_space_state
+	var checker := _make_passability_checker(space_state)
+	var span := Vector2(grid_max.x - grid_min.x, grid_max.y - grid_min.y)
+	var root_size := _next_aligned_size(maxf(span.x, span.y), min_cell_size)
+	var root_center := Vector2((grid_min.x + grid_max.x) * 0.5, (grid_min.y + grid_max.y) * 0.5)
+
+	_root = QuadTree.build(root_center, root_size * 0.5, min_cell_size * 0.5, height_provider, checker)
+	_leaves = QuadTree.get_free_leaves(_root)
+
+	_draw_grid(_editor_im, mat)
+	_editor_grid_built = true
+	print("Pathfinder3D: Editor grid built — %d free leaves" % _leaves.size())
+
+func _clear_editor_grid() -> void:
+	if not Engine.is_editor_hint():
+		return
+	_root = null
+	_leaves = []
+	_editor_grid_built = false
+	if _editor_im:
+		_editor_im.clear_surfaces()
+	if _editor_mesh_instance:
+		var mat := _editor_mesh_instance.material_override as StandardMaterial3D
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+		mat.cull_mode = BaseMaterial3D.CULL_BACK
+
 func _setup_debug() -> void:
 	_debug_im = ImmediateMesh.new()
 	_debug_mesh_instance = MeshInstance3D.new()
@@ -218,9 +271,11 @@ func _corner_pos(center: Vector3, dx: float, dz: float, y_offset: Vector3) -> Ve
 	pos.y = height_provider.get_height(pos) if height_provider else center.y
 	return pos + y_offset
 
-func _draw_debug_grid() -> void:
-	_debug_im.clear_surfaces()
+func _draw_grid(im: ImmediateMesh, mat: Material) -> void:
+	_active_im = im
+	im.clear_surfaces()
 	if _leaves.is_empty():
+		_active_im = null
 		return
 	var color := Color(0, 0.5, 0, 0.35)
 	var blocked_color := Color(1, 0, 0, 0.35)
@@ -229,9 +284,9 @@ func _draw_debug_grid() -> void:
 	var line_hw := 0.06 # Half-width of outline quads
 
 	# Draw blocked cells (fill + outline), then free cell outlines as thin quads
-	_debug_im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _debug_mesh_instance.material_override)
+	im.surface_begin(Mesh.PRIMITIVE_TRIANGLES, mat)
 	_draw_blocked_leaves(_root, y_offset, blocked_color, blocked_outline_color, line_hw)
-	_debug_im.surface_set_color(color)
+	_active_im.surface_set_color(color)
 	for leaf in _leaves:
 		var h := leaf.half_size
 		var a := _corner_pos(leaf.center, -h, -h, y_offset)
@@ -242,17 +297,18 @@ func _draw_debug_grid() -> void:
 		_draw_line_quad(b, c, line_hw)
 		_draw_line_quad(c, d, line_hw)
 		_draw_line_quad(d, a, line_hw)
-	_debug_im.surface_end()
+	im.surface_end()
+	_active_im = null
 
 func _draw_line_quad(from: Vector3, to: Vector3, half_width: float) -> void:
 	var dir := (to - from).normalized()
 	var perp := Vector3(-dir.z, 0, dir.x) * half_width
-	_debug_im.surface_add_vertex(from - perp)
-	_debug_im.surface_add_vertex(to - perp)
-	_debug_im.surface_add_vertex(to + perp)
-	_debug_im.surface_add_vertex(from - perp)
-	_debug_im.surface_add_vertex(to + perp)
-	_debug_im.surface_add_vertex(from + perp)
+	_active_im.surface_add_vertex(from - perp)
+	_active_im.surface_add_vertex(to - perp)
+	_active_im.surface_add_vertex(to + perp)
+	_active_im.surface_add_vertex(from - perp)
+	_active_im.surface_add_vertex(to + perp)
+	_active_im.surface_add_vertex(from + perp)
 
 func _draw_blocked_leaves(cell: QuadTree.Cell, y_offset: Vector3, color: Color, outline_color: Color, line_hw: float) -> void:
 	if cell.is_leaf():
@@ -262,14 +318,14 @@ func _draw_blocked_leaves(cell: QuadTree.Cell, y_offset: Vector3, color: Color, 
 			var b := _corner_pos(cell.center,  h, -h, y_offset)
 			var c := _corner_pos(cell.center,  h,  h, y_offset)
 			var d := _corner_pos(cell.center, -h,  h, y_offset)
-			_debug_im.surface_set_color(color)
-			_debug_im.surface_add_vertex(a)
-			_debug_im.surface_add_vertex(b)
-			_debug_im.surface_add_vertex(c)
-			_debug_im.surface_add_vertex(a)
-			_debug_im.surface_add_vertex(c)
-			_debug_im.surface_add_vertex(d)
-			_debug_im.surface_set_color(outline_color)
+			_active_im.surface_set_color(color)
+			_active_im.surface_add_vertex(a)
+			_active_im.surface_add_vertex(b)
+			_active_im.surface_add_vertex(c)
+			_active_im.surface_add_vertex(a)
+			_active_im.surface_add_vertex(c)
+			_active_im.surface_add_vertex(d)
+			_active_im.surface_set_color(outline_color)
 			_draw_line_quad(a, b, line_hw)
 			_draw_line_quad(b, c, line_hw)
 			_draw_line_quad(c, d, line_hw)

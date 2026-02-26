@@ -1,3 +1,4 @@
+@tool
 @abstract class_name HeightProvider
 extends Resource
 ## Abstract base for providing ground height at a given world position.

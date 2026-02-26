@@ -108,6 +108,8 @@ metadata/_edit_lock_ = true
 [node name="Pathfinder3D" type="Node3D" parent="." unique_id=729155240 groups=["pathfinding"]]
 script = ExtResource("3_ifalb")
 min_cell_size = 0.5
+grid_min = Vector2(-200, -200)
+grid_max = Vector2(200, 200)
 cost_calculators = Array[ExtResource("4_usp30")]([ExtResource("5_w3jct"), ExtResource("slope_calc")])
 height_provider = ExtResource("7_usp30")
 debug_enabled = true

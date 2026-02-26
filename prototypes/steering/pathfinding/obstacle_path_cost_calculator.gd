@@ -1,3 +1,4 @@
+@tool
 class_name ObstaclePathCostCalculator
 extends PathCostCalculator
 ## Marks grid cells overlapping with obstacles as impassable.
