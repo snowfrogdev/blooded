@@ -14,14 +14,10 @@ extends Node
 @export var facing_provider: FacingProvider
 ## Maximum angular speed in radians per second.
 @export var max_angular_speed: float = 8.0
-## Maximum angular acceleration in radians per second squared.
-@export var max_angular_accel: float = 16.0
 ## Angular distance (radians) at which rotation stops (dead zone).
 @export var facing_align_radius: float = 0.02
 ## Angular distance (radians) at which deceleration begins.
 @export var facing_slow_radius: float = 0.5
-## Smoothing factor for angular velocity changes (lower = snappier).
-@export var facing_time_to_target: float = 0.1
 
 var _agent: Node3D
 var _moveable: Moveable3D
@@ -117,20 +113,19 @@ func _process_facing(delta: float) -> void:
 	debug_facing_direction = desired
 
 	if desired.is_zero_approx():
-		# No opinion — decelerate rotation to stop.
+		# No opinion — decelerate to stop.
 		kinematic.angular_velocity = move_toward(
-			kinematic.angular_velocity, 0.0, max_angular_accel * delta)
+			kinematic.angular_velocity, 0.0, max_angular_speed * delta / maxf(facing_slow_radius, 0.01))
 		return
 
-	var angular_accel := _reach_orientation(desired)
-	if angular_accel == 0.0:
-		kinematic.angular_velocity = 0.0
-	else:
-		kinematic.angular_velocity += angular_accel * delta
+	kinematic.angular_velocity = _compute_angular_velocity(desired)
 
 
-## Reynolds-style reach-orientation with arrive deceleration.
-func _reach_orientation(desired_direction: Vector3) -> float:
+## Compute angular velocity directly — no acceleration layer.
+## Uses arrive-style ramp: full speed outside [member facing_slow_radius],
+## linearly scaled inside, zero within [member facing_align_radius].
+## Assigning velocity directly prevents overshoot.
+func _compute_angular_velocity(desired_direction: Vector3) -> float:
 	var target_yaw := atan2(desired_direction.x, desired_direction.z)
 	var current_yaw := _agent.rotation.y
 	var delta_yaw := wrapf(target_yaw - current_yaw, -PI, PI)
@@ -139,14 +134,12 @@ func _reach_orientation(desired_direction: Vector3) -> float:
 	if absf(delta_yaw) < facing_align_radius:
 		return 0.0
 
-	# Desired speed: full outside slow_radius, ramped inside.
-	var desired_speed := max_angular_speed
+	# Full speed outside slow_radius, linearly ramped inside.
+	var speed := max_angular_speed
 	if absf(delta_yaw) < facing_slow_radius:
-		desired_speed = max_angular_speed * absf(delta_yaw) / facing_slow_radius
+		speed = max_angular_speed * absf(delta_yaw) / facing_slow_radius
 
-	var desired_angular_vel := desired_speed * signf(delta_yaw)
-	var accel := (desired_angular_vel - kinematic.angular_velocity) / maxf(facing_time_to_target, 0.01)
-	return clampf(accel, -max_angular_accel, max_angular_accel)
+	return speed * signf(delta_yaw)
 
 
 func _snapshot_debug() -> void:
