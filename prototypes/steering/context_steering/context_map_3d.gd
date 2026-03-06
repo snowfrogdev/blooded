@@ -64,22 +64,21 @@ func evaluate() -> void:
 		chosen_strength = 0.0
 		return
 
-	# Interpolate with neighbors for sub-slot precision.
+	# Parabolic interpolation for sub-slot precision.
+	# Fits a parabola through the best slot and its neighbors, then finds
+	# the vertex — the fractional slot index of the true peak.
 	var prev := posmod(best_slot - 1, NUM_SLOTS)
 	var next := posmod(best_slot + 1, NUM_SLOTS)
 	var val_prev := maxf(0.0, interest[prev] - danger[prev])
 	var val_next := maxf(0.0, interest[next] - danger[next])
 
-	var weighted_dir := ray_directions[best_slot] * best_value \
-		+ ray_directions[prev] * val_prev \
-		+ ray_directions[next] * val_next
+	var denom := val_prev - 2.0 * best_value + val_next
+	var offset := 0.0
+	if absf(denom) > 0.0001:
+		offset = clampf(0.5 * (val_prev - val_next) / denom, -0.5, 0.5)
 
-	var length := weighted_dir.length()
-	if length > 0.0001:
-		chosen_direction = weighted_dir / length
-	else:
-		chosen_direction = ray_directions[best_slot]
-
+	var angle := TAU * (best_slot + offset) / NUM_SLOTS
+	chosen_direction = Vector3(cos(angle), 0.0, sin(angle))
 	chosen_strength = best_value
 
 
