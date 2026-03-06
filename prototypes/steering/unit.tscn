@@ -22,9 +22,9 @@
 [ext_resource type="Script" uid="uid://dx5snylawu80x" path="res://prototypes/steering/context_steering/obstacle_danger_behavior.gd" id="16_danger"]
 [ext_resource type="Script" uid="uid://da7f8cqwti8v4" path="res://prototypes/steering/context_steering/context_behavior_3d.gd" id="17_ctxbhv"]
 [ext_resource type="Script" uid="uid://b3prcqu5d4sbm" path="res://prototypes/steering/context_steering/context_debug_draw.gd" id="18_ctxdbg"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/terrain_danger_behavior.gd" id="19_terrdng"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/slope_danger_behavior.gd" id="20_slopedng"]
-[ext_resource type="Script" path="res://prototypes/steering/context_steering/face_movement_provider.gd" id="21_facemov"]
+[ext_resource type="Script" uid="uid://cwbv807gi5jrb" path="res://prototypes/steering/context_steering/terrain_danger_behavior.gd" id="19_terrdng"]
+[ext_resource type="Script" uid="uid://c420a6igxv01t" path="res://prototypes/steering/context_steering/slope_danger_behavior.gd" id="20_slopedng"]
+[ext_resource type="Script" uid="uid://n24btwk0qa42" path="res://prototypes/steering/context_steering/face_movement_provider.gd" id="21_facemov"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_txqrf"]
 albedo_color = Color(0.3, 0.3, 0.3, 1)
@@ -67,6 +67,7 @@ script = ExtResource("15_seek")
 resource_local_to_scene = true
 script = ExtResource("16_danger")
 look_ahead = 4.0
+danger_falloff = 1.0
 
 [sub_resource type="Resource" id="Resource_terrain_danger"]
 resource_local_to_scene = true
@@ -75,9 +76,6 @@ script = ExtResource("19_terrdng")
 [sub_resource type="Resource" id="Resource_slope_danger"]
 resource_local_to_scene = true
 script = ExtResource("20_slopedng")
-
-[sub_resource type="Resource" id="Resource_facemov"]
-script = ExtResource("21_facemov")
 
 [sub_resource type="Resource" id="Resource_ctxpath"]
 resource_local_to_scene = true
@@ -89,6 +87,11 @@ resource_local_to_scene = true
 script = ExtResource("13_ctxact")
 max_speed = 7.5
 slow_radius = 7.5
+turn_slowdown_threshold = 0.85
+turn_speed_min_factor = 0.15
+
+[sub_resource type="Resource" id="Resource_facemov"]
+script = ExtResource("21_facemov")
 
 [node name="Unit" type="Node3D" unique_id=777597374]
 script = ExtResource("1_unit")
@@ -144,6 +147,8 @@ behaviors = Array[ExtResource("17_ctxbhv")]([SubResource("Resource_seek"), SubRe
 path_provider = SubResource("Resource_ctxpath")
 actuator = SubResource("Resource_ctxact")
 kinematic = NodePath("../GroundedKinematic3D")
+neighbor_spread = 0.1
+velocity_danger_speed_ref = 7.5
 facing_provider = SubResource("Resource_facemov")
 
 [node name="ContextDebugDraw" type="MeshInstance3D" parent="." unique_id=228603399]

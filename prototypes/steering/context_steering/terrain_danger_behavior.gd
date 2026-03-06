@@ -10,8 +10,6 @@ extends ContextBehavior3D
 @export var look_ahead: float = 4.0
 ## Number of distance samples per slot direction.
 @export_range(1, 8) var num_samples: int = 3
-## Fraction of danger to spread to adjacent slots.
-@export_range(0.0, 1.0) var neighbor_spread: float = 0.5
 ## Cost penalties keyed by terrain type. INF = impassable (full danger).
 @export var terrain_costs: Dictionary = TerrainType.PATH_COSTS
 ## Cost value that maps to maximum danger (1.0). Costs at or above this
@@ -66,14 +64,9 @@ func populate(agent: Node3D, _kinematic: Kinematic3D, map: ContextMap3D) -> void
 		for i in map.NUM_SLOTS:
 			dangers[i] -= baseline
 
-	# Apply dangers with neighbor spread.
 	for i in map.NUM_SLOTS:
 		if dangers[i] > 0.0:
 			map.merge_danger(i, dangers[i])
-			var prev := posmod(i - 1, map.NUM_SLOTS)
-			var next := posmod(i + 1, map.NUM_SLOTS)
-			map.merge_danger(prev, dangers[i] * neighbor_spread)
-			map.merge_danger(next, dangers[i] * neighbor_spread)
 
 
 func _get_terrain_cost(pos: Vector3) -> float:

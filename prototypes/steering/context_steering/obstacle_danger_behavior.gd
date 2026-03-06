@@ -4,11 +4,13 @@ extends ContextBehavior3D
 ## Graduated danger: closer obstacles produce higher values.
 ## Spreads danger to adjacent slots so the agent maintains body clearance.
 
-## Ray length in meters.
-@export var look_ahead: float = 3.0
+## Ray length in meters. Set high enough to cover braking distance at max speed.
+@export var look_ahead: float = 8.0
 @export_flags_3d_physics var obstacle_mask: int = 4
-## Fraction of danger to spread to adjacent slots.
-@export var neighbor_spread: float = 0.5
+## Exponent for distance-based danger falloff. 1.0 = linear, 2.0 = quadratic.
+## Higher values make distant obstacles produce weaker signals while keeping
+## close obstacles strong. Useful with large look_ahead values.
+@export var danger_falloff: float = 2.0
 
 
 func _init() -> void:
@@ -32,13 +34,8 @@ func populate(agent: Node3D, _kinematic: Kinematic3D, map: ContextMap3D) -> void
 		var result := space_state.intersect_ray(query)
 		if not result.is_empty():
 			var distance := origin.distance_to(result.position)
-			dangers[i] = 1.0 - (distance / look_ahead)
+			dangers[i] = pow(1.0 - (distance / look_ahead), danger_falloff)
 
-	# Apply dangers with neighbor spread.
 	for i in map.NUM_SLOTS:
 		if dangers[i] > 0.0:
 			map.merge_danger(i, dangers[i])
-			var prev := posmod(i - 1, map.NUM_SLOTS)
-			var next := posmod(i + 1, map.NUM_SLOTS)
-			map.merge_danger(prev, dangers[i] * neighbor_spread)
-			map.merge_danger(next, dangers[i] * neighbor_spread)

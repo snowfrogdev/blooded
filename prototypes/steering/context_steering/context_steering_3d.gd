@@ -9,6 +9,22 @@ extends Node
 @export var actuator: ContextActuator
 @export var kinematic: Kinematic3D
 
+@export_group("Danger Spread")
+## Fraction of danger to spread to adjacent slots for body clearance.
+## Applied after velocity reshaping so spread values are not re-amplified.
+@export var neighbor_spread: float = 0.5
+
+@export_group("Velocity Danger")
+## Multiplicative boost to danger in the velocity direction at full speed.
+## 0.0 = no amplification. 1.5 = up to 2.5x danger directly ahead.
+@export var velocity_danger_boost: float = 1.5
+## Reduction factor for danger opposite the velocity direction at full speed.
+## 0.7 = danger behind reduced to 0.3x.
+@export var velocity_danger_attenuation: float = 0.7
+## Speed (m/s) at which full reshaping applies. Below this, effect scales linearly.
+## At zero speed, no reshaping — raw danger values stand as-is.
+@export var velocity_danger_speed_ref: float = 5.0
+
 @export_group("Facing")
 ## Provides the desired facing direction each frame. See [FacingProvider].
 @export var facing_provider: FacingProvider
@@ -85,6 +101,9 @@ func _process_movement(delta: float) -> void:
 	for behavior in behaviors:
 		behavior.populate(_agent, kinematic, _map)
 
+	_reshape_danger_by_velocity()
+	_map.apply_neighbor_spread(neighbor_spread)
+
 	_map.evaluate()
 
 	if _map.chosen_strength <= 0.0 or _map.chosen_direction.is_zero_approx():
@@ -102,6 +121,18 @@ func _process_movement(delta: float) -> void:
 
 	kinematic.velocity += output.linear_acceleration * delta
 	_snapshot_debug()
+
+
+func _reshape_danger_by_velocity() -> void:
+	var vel_xz := Vector3(kinematic.velocity.x, 0.0, kinematic.velocity.z)
+	var speed := vel_xz.length()
+	if speed < 0.1:
+		return
+	var speed_factor := clampf(speed / velocity_danger_speed_ref, 0.0, 1.0)
+	_map.reshape_danger(
+		vel_xz / speed,
+		velocity_danger_boost * speed_factor,
+		velocity_danger_attenuation * speed_factor)
 
 
 func _process_facing(delta: float) -> void:

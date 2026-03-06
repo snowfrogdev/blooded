@@ -81,3 +81,38 @@ func evaluate() -> void:
 		chosen_direction = ray_directions[best_slot]
 
 	chosen_strength = best_value
+
+
+## Spreads each slot's danger to its immediate neighbors for body clearance.
+## Uses a snapshot to prevent cascading. Must be called after all behaviors
+## have populated and after any reshaping that should not affect spread.
+func apply_neighbor_spread(spread_factor: float) -> void:
+	if spread_factor <= 0.0:
+		return
+	var raw := danger.duplicate()
+	for i in NUM_SLOTS:
+		if raw[i] > 0.0:
+			var prev := posmod(i - 1, NUM_SLOTS)
+			var next := posmod(i + 1, NUM_SLOTS)
+			danger[prev] = maxf(danger[prev], raw[i] * spread_factor)
+			danger[next] = maxf(danger[next], raw[i] * spread_factor)
+
+
+## Scales existing danger values by a directional bias. Slots aligned with
+## [param bias_direction] are amplified, slots opposed are attenuated.
+## Slots with zero danger are unaffected (multiplicative only).
+## [param forward_boost]: extra multiplier at full alignment (1.5 → up to 2.5x).
+## [param backward_reduction]: reduction factor at full opposition (0.7 → down to 0.3x).
+func reshape_danger(
+	bias_direction: Vector3, forward_boost: float, backward_reduction: float
+) -> void:
+	for i in NUM_SLOTS:
+		if danger[i] <= 0.0:
+			continue
+		var alignment := ray_directions[i].dot(bias_direction)
+		var factor: float
+		if alignment > 0.0:
+			factor = 1.0 + alignment * forward_boost
+		else:
+			factor = 1.0 + alignment * backward_reduction
+		danger[i] = clampf(danger[i] * factor, 0.0, 1.0)

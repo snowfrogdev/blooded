@@ -30,6 +30,17 @@ extends Resource
 ## Speed multipliers keyed by [enum TerrainType.Type]. 1.0 = full speed.
 @export var terrain_speed_factors: Dictionary = TerrainType.SPEED_FACTORS
 
+@export_group("Turn")
+## Dot-product alignment below which speed is reduced. The dot product of the
+## unit's current velocity and desired direction equals the cosine of the angle
+## between them: 1.0 = same direction (0°), 0.5 = 60°, 0.0 = 90°, -1.0 = 180°.
+## Higher values trigger slowdown on gentler turns (0.85 ≈ 30° for humanoid feel).
+@export var turn_slowdown_threshold: float = 0.5
+## Minimum speed factor at the sharpest turns, as a fraction of target speed.
+## At alignment -1.0 (full reversal) speed is multiplied by this value.
+## The [member min_speed] floor still applies, so the unit never fully stops.
+@export var turn_speed_min_factor: float = 0.3
+
 var _height_provider: HeightProvider
 var _terrain: Terrain3D
 
@@ -60,6 +71,7 @@ func compute_steering(
 	var arrive_speed := strength * max_speed
 	arrive_speed *= _get_slope_factor(agent.global_position, direction)
 	arrive_speed *= _get_terrain_factor(agent.global_position, direction)
+	arrive_speed *= _get_turn_factor(kinematic, direction)
 
 	if distance <= slow_radius:
 		arrive_speed = arrive_speed * distance / slow_radius
@@ -99,3 +111,16 @@ func _get_terrain_factor(position: Vector3, direction: Vector3) -> float:
 	var base_factor: float = terrain_speed_factors.get(int(tex.x), 1.0)
 	var overlay_factor: float = terrain_speed_factors.get(int(tex.y), 1.0)
 	return lerpf(base_factor, overlay_factor, tex.z)
+
+
+func _get_turn_factor(kinematic: Kinematic3D, direction: Vector3) -> float:
+	var vel_xz := Vector3(kinematic.velocity.x, 0.0, kinematic.velocity.z)
+	if vel_xz.length_squared() <= min_speed * min_speed:
+		return 1.0
+	var alignment := vel_xz.normalized().dot(direction)
+	if alignment >= turn_slowdown_threshold:
+		return 1.0
+	var t := clampf(
+		remap(alignment, turn_slowdown_threshold, -1.0, 1.0, 0.0),
+		0.0, 1.0)
+	return lerpf(1.0, turn_speed_min_factor, t)
